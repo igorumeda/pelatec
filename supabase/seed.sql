@@ -1,0 +1,4 @@
+-- Optional seed helper after creating users in Supabase Auth.
+-- Replace the UUIDs below with existing auth user IDs before running.
+-- insert into public.peladas (name, city, neighborhood, venue, default_time, monthly_fee, daily_fee, created_by)
+-- values ('Pelada de Quinta', 'São Paulo', 'Vila Mariana', 'Arena Central', '20:00', 120, 35, '00000000-0000-0000-0000-000000000000');

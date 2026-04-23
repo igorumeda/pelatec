@@ -1,0 +1,11 @@
+
+> pelatec@1.0.0 dev
+> next dev -p 3003
+
+   ▲ Next.js 15.5.15
+   - Local:        http://localhost:3003
+   - Network:      http://172.22.16.1:3003
+   - Environments: .env.local
+
+ ✓ Starting...
+[?25h
