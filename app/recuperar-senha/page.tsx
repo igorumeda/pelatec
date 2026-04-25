@@ -1,13 +1,15 @@
 import Link from "next/link";
+import { MailSearch } from "lucide-react";
 import { recoverPasswordAction } from "@/app/actions";
 import { ActionStateForm } from "@/components/action-state-form";
-import { Card, Field, PageHeader } from "@/components/ui";
+import { Card, CardTitle, Field, PageHeader } from "@/components/ui";
 
 export default function RecoverPasswordPage() {
   return (
     <div className="mx-auto max-w-md">
-      <PageHeader title="Recuperar senha" description="Informe seu e-mail para receber o link de redefinição." />
+      <PageHeader title="Recuperar senha" description="Informe seu e-mail para receber o link de redefinicao." />
       <Card>
+        <CardTitle icon={MailSearch}>Recuperacao de acesso</CardTitle>
         <ActionStateForm action={recoverPasswordAction} submitLabel="Enviar link">
           <Field label="E-mail">
             <input name="email" type="email" required autoComplete="email" />

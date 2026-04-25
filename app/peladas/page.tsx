@@ -1,9 +1,9 @@
 import Link from "next/link";
-import { Plus } from "lucide-react";
+import { Plus, UsersRound } from "lucide-react";
 import { EmptyState, LinkButton, PageHeader, Card } from "@/components/ui";
 import { requireUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
-import { brl } from "@/lib/utils";
+import { brl, memberRoleLabel } from "@/lib/utils";
 
 export default async function PeladasPage() {
   const user = await requireUser();
@@ -26,10 +26,13 @@ export default async function PeladasPage() {
               <Card className="h-full transition hover:border-field-500">
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <h2 className="font-semibold">{row.peladas.name}</h2>
+                    <h2 className="flex items-center gap-2 font-semibold">
+                      <UsersRound size={18} className="text-field-700" />
+                      <span>{row.peladas.name}</span>
+                    </h2>
                     <p className="mt-1 text-sm text-zinc-600">{row.peladas.venue ?? "Local não informado"}</p>
                   </div>
-                  <span className="rounded-md bg-zinc-100 px-2 py-1 text-xs uppercase text-zinc-600">{row.role}</span>
+                  <span className="rounded-md bg-zinc-100 px-2 py-1 text-xs uppercase text-zinc-600">{memberRoleLabel(row.role)}</span>
                 </div>
                 <div className="mt-4 grid grid-cols-2 gap-2 text-sm text-zinc-600">
                   <span>{row.peladas.city ?? "Cidade não informada"}</span>

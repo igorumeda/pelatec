@@ -1,9 +1,11 @@
+import { ShieldPlus, UsersRound } from "lucide-react";
 import { addMemberAction, updateMemberRoleFormAction } from "@/app/actions";
 import { ActionStateForm } from "@/components/action-state-form";
-import { Card, Field, PageHeader } from "@/components/ui";
+import { Card, CardTitle, Field, PageHeader } from "@/components/ui";
 import { SubmitButton } from "@/components/submit-button";
 import { canManage, getMyRole, requireUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
+import { memberRoleLabel } from "@/lib/utils";
 
 export default async function MembersPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -21,7 +23,8 @@ export default async function MembersPage({ params }: { params: Promise<{ id: st
       <PageHeader title="Membros" description="Gerencie jogadores e administradores da pelada." />
       <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
         <Card>
-          <div className="space-y-3">
+          <CardTitle icon={UsersRound}>Lista de membros</CardTitle>
+          <div className="mt-4 space-y-3">
             {members?.map((member: any) => (
               <div key={member.user_id} className="flex flex-col gap-3 rounded-md border border-zinc-200 p-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
@@ -33,30 +36,31 @@ export default async function MembersPage({ params }: { params: Promise<{ id: st
                     <input type="hidden" name="pelada_id" value={id} />
                     <input type="hidden" name="user_id" value={member.user_id} />
                     <select name="role" defaultValue={member.role} className="w-32">
-                      <option value="player">Player</option>
-                      <option value="admin">Admin</option>
+                      <option value="player">Jogador</option>
+                      <option value="admin">Administrador</option>
                     </select>
                     <SubmitButton>Salvar</SubmitButton>
                   </form>
                 ) : (
-                  <span className="rounded-md bg-zinc-100 px-2 py-1 text-xs uppercase text-zinc-600">{member.role}</span>
+                  <span className="rounded-md bg-zinc-100 px-2 py-1 text-xs uppercase text-zinc-600">{memberRoleLabel(member.role)}</span>
                 )}
               </div>
             ))}
           </div>
         </Card>
+
         {canManage(role) ? (
           <Card>
-            <h2 className="font-semibold">Adicionar membro</h2>
+            <CardTitle icon={ShieldPlus}>Adicionar membro</CardTitle>
             <ActionStateForm action={addMemberAction} submitLabel="Adicionar" className="mt-4 space-y-4">
               <input type="hidden" name="pelada_id" value={id} />
-              <Field label="E-mail do usuário">
+              <Field label="E-mail do usuario">
                 <input name="email" type="email" required />
               </Field>
               <Field label="Papel">
                 <select name="role" defaultValue="player">
-                  <option value="player">Player</option>
-                  <option value="admin">Admin</option>
+                  <option value="player">Jogador</option>
+                  <option value="admin">Administrador</option>
                 </select>
               </Field>
             </ActionStateForm>

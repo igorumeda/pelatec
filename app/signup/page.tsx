@@ -1,13 +1,15 @@
 import Link from "next/link";
-import { ActionStateForm } from "@/components/action-state-form";
-import { Field, Card, PageHeader } from "@/components/ui";
+import { UserPlus } from "lucide-react";
 import { signUpAction } from "@/app/actions";
+import { ActionStateForm } from "@/components/action-state-form";
+import { Card, CardTitle, Field, PageHeader } from "@/components/ui";
 
 export default function SignupPage() {
   return (
     <div className="mx-auto max-w-md">
-      <PageHeader title="Criar conta" description="Seu perfil será usado nas peladas em que você participa." />
+      <PageHeader title="Criar conta" description="Seu perfil sera usado nas peladas em que voce participa." />
       <Card>
+        <CardTitle icon={UserPlus}>Cadastro</CardTitle>
         <ActionStateForm action={signUpAction} submitLabel="Criar conta">
           <Field label="Nome">
             <input name="name" required autoComplete="name" />
@@ -20,7 +22,7 @@ export default function SignupPage() {
           </Field>
         </ActionStateForm>
         <p className="mt-4 text-sm text-zinc-600">
-          Já tem conta? <Link className="font-semibold text-field-700" href="/login">Entrar</Link>
+          Ja tem conta? <Link className="font-semibold text-field-700" href="/login">Entrar</Link>
         </p>
       </Card>
     </div>

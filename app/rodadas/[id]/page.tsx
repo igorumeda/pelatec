@@ -1,9 +1,10 @@
 import Link from "next/link";
+import { CalendarCog, Shield, Trophy } from "lucide-react";
 import { upsertRoundAction } from "@/app/actions";
 import { ActionStateForm } from "@/components/action-state-form";
 import { MatchRegistration } from "@/components/match-registration";
 import { MyPresenceCard, PresenceAwareDrawBoard, PresenceListCard, RoundPresenceProvider } from "@/components/round-presence";
-import { Card, Field, PageHeader } from "@/components/ui";
+import { Card, CardTitle, Field, PageHeader } from "@/components/ui";
 import { canManage, getMyRole, requireUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { dateLabel } from "@/lib/utils";
@@ -35,17 +36,12 @@ export default async function RoundDetailsPage({ params }: { params: Promise<{ i
         .order("created_at")
     : { data: [] };
 
-  const { data: presence } = await supabase
-    .from("round_presence")
-    .select("user_id, status")
-    .eq("round_id", id);
-
+  const { data: presence } = await supabase.from("round_presence").select("user_id, status").eq("round_id", id);
   const { data: teams } = await supabase
     .from("round_teams")
     .select("id, name, sort_order, round_team_players(user_id, profiles(name))")
     .eq("round_id", id)
     .order("sort_order");
-
   const { data: matches } = await supabase
     .from("round_matches")
     .select("*, team_a:round_teams!round_matches_team_a_id_fkey(name), team_b:round_teams!round_matches_team_b_id_fkey(name)")
@@ -87,11 +83,10 @@ export default async function RoundDetailsPage({ params }: { params: Promise<{ i
       <div className="grid gap-6 lg:grid-cols-[1fr_380px]">
         <div className="space-y-6">
           <MyPresenceCard />
-
           {manageable ? <PresenceAwareDrawBoard roundId={id} /> : null}
 
           <Card>
-            <h2 className="font-semibold">Times salvos</h2>
+            <CardTitle icon={Shield}>Times salvos</CardTitle>
             <div className="mt-4 grid gap-3 sm:grid-cols-2">
               {teams?.map((team: any) => (
                 <div key={team.id} className="rounded-md border border-zinc-200 p-4">
@@ -109,7 +104,7 @@ export default async function RoundDetailsPage({ params }: { params: Promise<{ i
 
           {manageable ? (
             <Card>
-              <h2 className="font-semibold">Registrar partida simples</h2>
+              <CardTitle icon={Trophy}>Registrar partida simples</CardTitle>
               <MatchRegistration roundId={id} teams={matchTeams} />
               <div className="mt-4 space-y-2">
                 {matches?.map((match: any) => (
@@ -127,7 +122,7 @@ export default async function RoundDetailsPage({ params }: { params: Promise<{ i
 
           {manageable && round ? (
             <Card>
-              <h2 className="font-semibold">Editar rodada</h2>
+              <CardTitle icon={CalendarCog}>Editar rodada</CardTitle>
               <ActionStateForm action={editAction} submitLabel="Salvar" className="mt-4 space-y-4">
                 <input type="hidden" name="pelada_id" value={round.pelada_id} />
                 <Field label="Titulo"><input name="title" defaultValue={round.title ?? ""} /></Field>

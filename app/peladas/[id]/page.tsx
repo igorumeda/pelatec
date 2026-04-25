@@ -1,6 +1,6 @@
 import Link from "next/link";
-import { Calendar, CircleDollarSign, Settings, UsersRound } from "lucide-react";
-import { PageHeader, Card, LinkButton, Stat } from "@/components/ui";
+import { Calendar, CalendarDays, CircleDollarSign, Rocket, Settings, UsersRound } from "lucide-react";
+import { Card, CardTitle, LinkButton, PageHeader, Stat } from "@/components/ui";
 import { canManage, getMyRole, requireUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { brl, dateLabel } from "@/lib/utils";
@@ -28,25 +28,27 @@ export default async function PeladaDetailsPage({ params }: { params: Promise<{ 
       <PageHeader title={pelada?.name ?? "Pelada"} description={pelada?.description ?? "Painel operacional da pelada."} />
       <div className="grid gap-4 sm:grid-cols-4">
         <Stat label="Membros" value={memberCount ?? 0} />
-        <Stat label="Próximas rodadas" value={rounds?.length ?? 0} />
-        <Stat label="Pendências" value={debtors ?? 0} />
+        <Stat label="Proximas rodadas" value={rounds?.length ?? 0} />
+        <Stat label="Pendencias" value={debtors ?? 0} />
         <Stat label="Saldo" value={brl(balance)} />
       </div>
+
       <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_0.9fr]">
         <Card>
-          <h2 className="font-semibold">Próximas rodadas</h2>
+          <CardTitle icon={CalendarDays}>Proximas rodadas</CardTitle>
           <div className="mt-4 space-y-3">
             {rounds?.map((round: any) => (
               <Link key={round.id} href={`/rodadas/${round.id}`} className="block rounded-md border border-zinc-200 p-4 hover:bg-zinc-50">
                 <p className="font-medium">{round.title ?? "Rodada"}</p>
-                <p className="text-sm text-zinc-600">{dateLabel(round.round_date)} às {round.starts_at.slice(0, 5)}</p>
+                <p className="text-sm text-zinc-600">{dateLabel(round.round_date)} as {round.starts_at.slice(0, 5)}</p>
               </Link>
             ))}
             {!rounds?.length ? <p className="text-sm text-zinc-600">Nenhuma rodada agendada.</p> : null}
           </div>
         </Card>
+
         <Card>
-          <h2 className="font-semibold">Atalhos</h2>
+          <CardTitle icon={Rocket}>Atalhos</CardTitle>
           <div className="mt-4 grid gap-3">
             <LinkButton href={`/peladas/${id}/rodadas`} variant="secondary"><Calendar size={16} /> Agenda</LinkButton>
             <LinkButton href={`/peladas/${id}/membros`} variant="secondary"><UsersRound size={16} /> Membros</LinkButton>

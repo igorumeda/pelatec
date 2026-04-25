@@ -1,13 +1,15 @@
 import Link from "next/link";
-import { ActionStateForm } from "@/components/action-state-form";
-import { Field, Card, PageHeader } from "@/components/ui";
+import { LogIn } from "lucide-react";
 import { signInAction } from "@/app/actions";
+import { ActionStateForm } from "@/components/action-state-form";
+import { Card, CardTitle, Field, PageHeader } from "@/components/ui";
 
 export default function LoginPage() {
   return (
     <div className="mx-auto max-w-md">
       <PageHeader title="Entrar" description="Acesse sua conta para administrar suas peladas." />
       <Card>
+        <CardTitle icon={LogIn}>Acesso</CardTitle>
         <ActionStateForm action={signInAction} submitLabel="Entrar">
           <Field label="E-mail">
             <input name="email" type="email" required autoComplete="email" />
@@ -17,7 +19,7 @@ export default function LoginPage() {
           </Field>
         </ActionStateForm>
         <p className="mt-4 text-sm text-zinc-600">
-          Ainda não tem conta? <Link className="font-semibold text-field-700" href="/signup">Criar conta</Link>
+          Ainda nao tem conta? <Link className="font-semibold text-field-700" href="/signup">Criar conta</Link>
         </p>
         <p className="mt-2 text-sm text-zinc-600">
           Esqueceu a senha? <Link className="font-semibold text-field-700" href="/recuperar-senha">Recuperar acesso</Link>

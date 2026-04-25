@@ -1,5 +1,5 @@
 import Link from "next/link";
-import type { ComponentProps, ReactNode } from "react";
+import type { ComponentProps, ElementType, ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
 export function Button({
@@ -41,6 +41,23 @@ export function LinkButton({
 
 export function Card({ className, ...props }: ComponentProps<"div">) {
   return <div className={cn("rounded-lg border border-zinc-200 bg-white p-5 shadow-soft", className)} {...props} />;
+}
+
+export function CardTitle({
+  icon: Icon,
+  children,
+  className
+}: {
+  icon: ElementType;
+  children: ReactNode;
+  className?: string;
+}) {
+  return (
+    <h2 className={cn("flex items-center gap-2 font-semibold text-zinc-900", className)}>
+      <Icon size={18} className="text-field-700" />
+      <span>{children}</span>
+    </h2>
+  );
 }
 
 export function PageHeader({

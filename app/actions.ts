@@ -33,6 +33,10 @@ function values(formData: FormData) {
   return Object.fromEntries(formData.entries());
 }
 
+function revalidateAppShell() {
+  revalidatePath("/", "layout");
+}
+
 function actionError(error: unknown) {
   if (error instanceof z.ZodError) {
     return { ok: false, message: error.issues[0]?.message ?? "Dados inválidos" };
@@ -445,6 +449,7 @@ export async function createBulkChargesAction(_: unknown, formData: FormData) {
     if (error) throw error;
     revalidatePath(`/peladas/${input.pelada_id}/financeiro`);
     revalidatePath("/dashboard");
+    revalidateAppShell();
     return { ok: true, message: `${rows.length} cobrança(s) criada(s)` };
   } catch (error) {
     return actionError(error);
@@ -508,6 +513,7 @@ export async function submitPlayerPaymentAction(_: unknown, formData: FormData) 
 
     revalidatePath("/dashboard");
     revalidatePath(`/peladas/${charge.pelada_id}/financeiro`);
+    revalidateAppShell();
     return { ok: true, message: "Pagamento enviado para aprovação" };
   } catch (error) {
     return actionError(error);
@@ -543,6 +549,7 @@ export async function reviewPaymentAction(_: unknown, formData: FormData) {
 
     revalidatePath(`/peladas/${input.pelada_id}/financeiro`);
     revalidatePath("/dashboard");
+    revalidateAppShell();
     return { ok: true, message: input.status === "approved" ? "Pagamento aprovado" : "Pagamento rejeitado" };
   } catch (error) {
     return actionError(error);
@@ -563,10 +570,11 @@ export async function cancelChargeAction(formData: FormData) {
     .update({ status: "cancelled" })
     .eq("id", input.charge_id)
     .eq("pelada_id", input.pelada_id)
-    .eq("status", "open");
+    .neq("status", "cancelled");
 
   if (error) throw new Error(error.message);
 
   revalidatePath(`/peladas/${input.pelada_id}/financeiro`);
   revalidatePath("/dashboard");
+  revalidateAppShell();
 }
