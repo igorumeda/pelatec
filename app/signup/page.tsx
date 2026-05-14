@@ -2,7 +2,7 @@ import Link from "next/link";
 import { UserPlus } from "lucide-react";
 import { signUpAction } from "@/app/actions";
 import { ActionStateForm } from "@/components/action-state-form";
-import { BackLink, Card, CardTitle, Field, PageHeader } from "@/components/ui";
+import { Card, CardTitle, Field, PageHeader } from "@/components/ui";
 
 export default function SignupPage() {
   return (
@@ -10,7 +10,6 @@ export default function SignupPage() {
       <PageHeader
         title="Criar conta"
         description="Seu perfil sera usado nas peladas em que voce participa."
-        action={<BackLink href="/">Voltar ao inicio</BackLink>}
       />
       <Card>
         <CardTitle icon={UserPlus}>Cadastro</CardTitle>
