@@ -2,7 +2,7 @@ import { Settings } from "lucide-react";
 import { redirect } from "next/navigation";
 import { updatePeladaAction } from "@/app/actions";
 import { ActionStateForm } from "@/components/action-state-form";
-import { Card, CardTitle, Field, PageHeader } from "@/components/ui";
+import { BackLink, Card, CardTitle, Field, PageHeader } from "@/components/ui";
 import { canManage, getMyRole, requireUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 
@@ -17,7 +17,7 @@ export default async function EditPeladaPage({ params }: { params: Promise<{ id:
 
   return (
     <div className="mx-auto max-w-3xl">
-      <PageHeader title="Editar pelada" />
+      <PageHeader title="Editar pelada" action={<BackLink href={`/peladas/${id}`}>Voltar para a pelada</BackLink>} />
       <Card>
         <CardTitle icon={Settings}>Configuracoes da pelada</CardTitle>
         <ActionStateForm action={action}>

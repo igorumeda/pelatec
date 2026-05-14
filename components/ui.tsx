@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 import type { ComponentProps, ElementType, ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
@@ -36,6 +37,20 @@ export function LinkButton({
       )}
       {...props}
     />
+  );
+}
+
+export function BackLink({
+  href,
+  children = "Voltar",
+  className,
+  ...props
+}: Omit<ComponentProps<typeof Link>, "href"> & { href: string; children?: ReactNode }) {
+  return (
+    <LinkButton href={href} variant="secondary" className={cn("gap-2", className)} {...props}>
+      <ArrowLeft size={16} />
+      {children}
+    </LinkButton>
   );
 }
 
@@ -98,11 +113,12 @@ export function Field({ label, children }: { label: string; children: ReactNode 
   );
 }
 
-export function Stat({ label, value }: { label: string; value: ReactNode }) {
+export function Stat({ label, value, description }: { label: string; value: ReactNode; description?: ReactNode }) {
   return (
     <Card>
       <p className="text-sm text-zinc-600">{label}</p>
       <p className="mt-2 text-2xl font-bold text-ink">{value}</p>
+      {description ? <p className="mt-1 text-xs text-zinc-500">{description}</p> : null}
     </Card>
   );
 }

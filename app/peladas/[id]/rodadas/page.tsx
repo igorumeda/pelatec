@@ -2,7 +2,7 @@ import Link from "next/link";
 import { CalendarDays, CalendarPlus2 } from "lucide-react";
 import { upsertRoundAction } from "@/app/actions";
 import { ActionStateForm } from "@/components/action-state-form";
-import { Card, CardTitle, EmptyState, Field, PageHeader } from "@/components/ui";
+import { BackLink, Card, CardTitle, EmptyState, Field, PageHeader } from "@/components/ui";
 import { canManage, getMyRole, requireUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { dateLabel, roundStatusLabel } from "@/lib/utils";
@@ -22,7 +22,11 @@ export default async function RoundsPage({ params }: { params: Promise<{ id: str
 
   return (
     <>
-      <PageHeader title="Agenda" description={`Rodadas da ${pelada?.name ?? "pelada"}.`} />
+      <PageHeader
+        title="Agenda"
+        description={`Rodadas da ${pelada?.name ?? "pelada"}.`}
+        action={<BackLink href={`/peladas/${id}`}>Voltar para a pelada</BackLink>}
+      />
       <div className="grid gap-6 lg:grid-cols-[1fr_380px]">
         <Card>
           <CardTitle icon={CalendarDays}>Rodadas cadastradas</CardTitle>

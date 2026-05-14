@@ -7,6 +7,7 @@ import { z } from "zod";
 import { requireUser } from "@/lib/auth";
 import {
   bulkChargeSchema,
+  cancelPaymentSchema,
   cancelChargeSchema,
   chargeSchema,
   drawSchema,
@@ -573,6 +574,53 @@ export async function cancelChargeAction(formData: FormData) {
     .neq("status", "cancelled");
 
   if (error) throw new Error(error.message);
+
+  revalidatePath(`/peladas/${input.pelada_id}/financeiro`);
+  revalidatePath("/dashboard");
+  revalidateAppShell();
+}
+
+export async function cancelPaymentAction(formData: FormData) {
+  await requireUser();
+  const supabase = await createClient();
+  const input = cancelPaymentSchema.parse(values(formData));
+
+  const { data: payment, error: paymentError } = await supabase
+    .from("player_payments")
+    .select("id, charge_id")
+    .eq("id", input.payment_id)
+    .eq("pelada_id", input.pelada_id)
+    .single();
+
+  if (paymentError) throw new Error(paymentError.message);
+
+  const { error: deleteError } = await supabase
+    .from("player_payments")
+    .delete()
+    .eq("id", input.payment_id)
+    .eq("pelada_id", input.pelada_id);
+
+  if (deleteError) throw new Error(deleteError.message);
+
+  if (payment.charge_id) {
+    const { data: approvedPayments, error: approvedPaymentsError } = await supabase
+      .from("player_payments")
+      .select("id")
+      .eq("charge_id", payment.charge_id)
+      .eq("status", "approved")
+      .limit(1);
+
+    if (approvedPaymentsError) throw new Error(approvedPaymentsError.message);
+
+    if (!approvedPayments?.length) {
+      const { error: chargeUpdateError } = await supabase
+        .from("player_charges")
+        .update({ status: "open" })
+        .eq("id", payment.charge_id);
+
+      if (chargeUpdateError) throw new Error(chargeUpdateError.message);
+    }
+  }
 
   revalidatePath(`/peladas/${input.pelada_id}/financeiro`);
   revalidatePath("/dashboard");

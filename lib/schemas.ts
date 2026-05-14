@@ -157,3 +157,8 @@ export const cancelChargeSchema = z.object({
   charge_id: z.string().uuid(),
   pelada_id: z.string().uuid()
 });
+
+export const cancelPaymentSchema = z.object({
+  payment_id: z.string().uuid(),
+  pelada_id: z.string().uuid()
+});

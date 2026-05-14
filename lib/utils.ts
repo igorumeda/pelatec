@@ -70,3 +70,14 @@ export function chargeStatusLabel(value: string | null | undefined) {
       return value ?? "-";
   }
 }
+
+export function peladaStatusLabel(value: string | null | undefined) {
+  switch (value) {
+    case "active":
+      return "Ativa";
+    case "inactive":
+      return "Inativa";
+    default:
+      return value ?? "-";
+  }
+}

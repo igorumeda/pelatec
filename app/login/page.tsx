@@ -2,12 +2,16 @@ import Link from "next/link";
 import { LogIn } from "lucide-react";
 import { signInAction } from "@/app/actions";
 import { ActionStateForm } from "@/components/action-state-form";
-import { Card, CardTitle, Field, PageHeader } from "@/components/ui";
+import { BackLink, Card, CardTitle, Field, PageHeader } from "@/components/ui";
 
 export default function LoginPage() {
   return (
     <div className="mx-auto max-w-md">
-      <PageHeader title="Entrar" description="Acesse sua conta para administrar suas peladas." />
+      <PageHeader
+        title="Entrar"
+        description="Acesse sua conta para administrar suas peladas."
+        action={<BackLink href="/">Voltar ao inicio</BackLink>}
+      />
       <Card>
         <CardTitle icon={LogIn}>Acesso</CardTitle>
         <ActionStateForm action={signInAction} submitLabel="Entrar">

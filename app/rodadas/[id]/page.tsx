@@ -1,10 +1,9 @@
-import Link from "next/link";
 import { CalendarCog, Shield, Trophy } from "lucide-react";
 import { upsertRoundAction } from "@/app/actions";
 import { ActionStateForm } from "@/components/action-state-form";
 import { MatchRegistration } from "@/components/match-registration";
 import { MyPresenceCard, PresenceAwareDrawBoard, PresenceListCard, RoundPresenceProvider } from "@/components/round-presence";
-import { Card, CardTitle, Field, PageHeader } from "@/components/ui";
+import { BackLink, Card, CardTitle, Field, PageHeader } from "@/components/ui";
 import { canManage, getMyRole, requireUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { dateLabel } from "@/lib/utils";
@@ -77,7 +76,7 @@ export default async function RoundDetailsPage({ params }: { params: Promise<{ i
       <PageHeader
         title={round?.title ?? "Rodada"}
         description={round ? `${round.peladas?.name} - ${dateLabel(round.round_date)} as ${round.starts_at.slice(0, 5)}` : undefined}
-        action={round?.pelada_id ? <Link className="text-sm font-semibold text-field-700" href={`/peladas/${round.pelada_id}`}>Voltar para pelada</Link> : null}
+        action={round?.pelada_id ? <BackLink href={`/peladas/${round.pelada_id}`}>Voltar para a pelada</BackLink> : <BackLink href="/dashboard">Voltar ao painel</BackLink>}
       />
 
       <div className="grid gap-6 lg:grid-cols-[1fr_380px]">

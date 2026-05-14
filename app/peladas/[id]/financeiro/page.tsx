@@ -1,10 +1,10 @@
 import { Banknote, BellRing, Check, CircleDollarSign, ClipboardList, Landmark, ReceiptText, WalletCards, X } from "lucide-react";
 import { redirect } from "next/navigation";
-import { cancelChargeAction, createFinancialEntryAction, reviewPaymentFormAction } from "@/app/actions";
+import { cancelChargeAction, cancelPaymentAction, createFinancialEntryAction, reviewPaymentFormAction } from "@/app/actions";
 import { ActionStateForm } from "@/components/action-state-form";
 import { BulkChargeForm } from "@/components/bulk-charge-form";
 import { FinanceTabs } from "@/components/finance-tabs";
-import { Card, CardTitle, Field, PageHeader, Stat } from "@/components/ui";
+import { BackLink, Card, CardTitle, Field, PageHeader, Stat } from "@/components/ui";
 import { canManage, getMyRole, requireUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { brl, chargeStatusLabel, competenceLabel, dateLabel } from "@/lib/utils";
@@ -26,6 +26,7 @@ export default async function FinancePage({ params }: { params: Promise<{ id: st
   const approvedPayments = (payments ?? []).filter((p: any) => p.status === "approved");
   const paymentTotal = approvedPayments.reduce((sum: number, p: any) => sum + Number(p.amount), 0);
   const pendingPayments = (payments ?? []).filter((p: any) => p.status === "pending");
+  const totalBalance = entryBalance + paymentTotal;
   const grouped = groupByCompetence(charges ?? [], payments ?? [], entries ?? []);
   const chargeMembers = (members ?? []).map((member: any) => ({
     user_id: member.user_id,
@@ -48,11 +49,16 @@ export default async function FinancePage({ params }: { params: Promise<{ id: st
 
   return (
     <>
-      <PageHeader title="Financeiro" description="Cobrancas, pagamentos, despesas e saldo por competencia." />
+      <PageHeader
+        title="Financeiro"
+        description="Cobrancas, pagamentos, despesas e saldo por competencia."
+        action={<BackLink href={`/peladas/${id}`}>Voltar para a pelada</BackLink>}
+      />
 
-      <div className="grid gap-4 sm:grid-cols-4">
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
         <Stat label="Saldo de lancamentos" value={brl(entryBalance)} />
         <Stat label="Pagamentos aprovados" value={brl(paymentTotal)} />
+        <Stat label="Saldo geral" value={brl(totalBalance)} />
         <Stat label="Cobrancas abertas" value={brl(chargeOpen)} />
         <Stat label="Pagamentos pendentes" value={pendingPayments.length} />
       </div>
@@ -180,6 +186,34 @@ export default async function FinancePage({ params }: { params: Promise<{ id: st
                 </div>
               </Card>
             </div>
+
+            <Card>
+              <CardTitle icon={Check}>Pagamentos efetuados</CardTitle>
+              <div className="mt-4 space-y-2">
+                {approvedPayments.map((payment: any) => (
+                  <div key={payment.id} className="flex items-start justify-between gap-3 rounded-md border border-zinc-200 p-3 text-sm">
+                    <div>
+                      <strong>{memberName.get(payment.user_id) ?? "Jogador"}</strong>
+                      <p className="text-zinc-600">
+                        {chargeById.get(payment.charge_id)?.description ?? "Pagamento avulso"} - {brl(payment.amount)}
+                      </p>
+                      <p className="text-xs text-zinc-500">
+                        Pago em {dateLabel(payment.paid_at)}
+                      </p>
+                      {payment.notes ? <p className="mt-1 text-xs text-zinc-500">{payment.notes}</p> : null}
+                    </div>
+                    <form action={cancelPaymentAction}>
+                      <input type="hidden" name="payment_id" value={payment.id} />
+                      <input type="hidden" name="pelada_id" value={id} />
+                      <button className="rounded-md border border-red-200 px-3 py-2 text-xs font-semibold text-red-700 hover:bg-red-50">
+                        Cancelar
+                      </button>
+                    </form>
+                  </div>
+                ))}
+                {!approvedPayments.length ? <p className="text-sm text-zinc-600">Nenhum pagamento efetuado ainda.</p> : null}
+              </div>
+            </Card>
 
             <Card>
               <CardTitle icon={WalletCards}>Cobrancas criadas</CardTitle>

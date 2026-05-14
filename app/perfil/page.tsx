@@ -1,7 +1,7 @@
 import { UserCircle2 } from "lucide-react";
 import { updateProfileAction } from "@/app/actions";
 import { ActionStateForm } from "@/components/action-state-form";
-import { Card, CardTitle, Field, PageHeader } from "@/components/ui";
+import { BackLink, Card, CardTitle, Field, PageHeader } from "@/components/ui";
 import { requireUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 
@@ -12,7 +12,11 @@ export default async function ProfilePage() {
 
   return (
     <div className="mx-auto max-w-2xl">
-      <PageHeader title="Perfil" description="Atualize seus dados basicos de jogador." />
+      <PageHeader
+        title="Perfil"
+        description="Atualize seus dados basicos de jogador."
+        action={<BackLink href="/dashboard">Voltar ao painel</BackLink>}
+      />
       <Card>
         <CardTitle icon={UserCircle2}>Dados do perfil</CardTitle>
         <ActionStateForm action={updateProfileAction}>

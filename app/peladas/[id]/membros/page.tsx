@@ -1,7 +1,7 @@
 import { ShieldPlus, UsersRound } from "lucide-react";
 import { addMemberAction, updateMemberRoleFormAction } from "@/app/actions";
 import { ActionStateForm } from "@/components/action-state-form";
-import { Card, CardTitle, Field, PageHeader } from "@/components/ui";
+import { BackLink, Card, CardTitle, Field, PageHeader } from "@/components/ui";
 import { SubmitButton } from "@/components/submit-button";
 import { canManage, getMyRole, requireUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
@@ -20,7 +20,11 @@ export default async function MembersPage({ params }: { params: Promise<{ id: st
 
   return (
     <>
-      <PageHeader title="Membros" description="Gerencie jogadores e administradores da pelada." />
+      <PageHeader
+        title="Membros"
+        description="Gerencie jogadores e administradores da pelada."
+        action={<BackLink href={`/peladas/${id}`}>Voltar para a pelada</BackLink>}
+      />
       <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
         <Card>
           <CardTitle icon={UsersRound}>Lista de membros</CardTitle>
