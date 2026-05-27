@@ -26,7 +26,8 @@ import {
   roundMatchWithStatsSchema,
   roundSchema,
   reviewPaymentSchema,
-  signupSchema
+  signupSchema,
+  verifySignupCodeSchema
 } from "@/lib/schemas";
 import { createClient } from "@/lib/supabase/server";
 
@@ -53,16 +54,50 @@ export async function signUpAction(_: unknown, formData: FormData) {
   const supabase = await createClient();
   try {
     const input = signupSchema.parse(values(formData));
-    const { error } = await supabase.auth.signUp({
+    const { error } = await supabase.auth.signInWithOtp({
       email: input.email,
-      password: input.password,
-      options: { data: { name: input.name } }
+      options: {
+        shouldCreateUser: true,
+        data: { name: input.name }
+      }
     });
     if (error) throw error;
   } catch (error) {
     return actionError(error);
   }
-  redirect("/dashboard");
+  const input = signupSchema.parse(values(formData));
+  redirect(`/signup/confirmar?email=${encodeURIComponent(input.email)}&name=${encodeURIComponent(input.name)}`);
+}
+
+export async function verifySignupCodeAction(_: unknown, formData: FormData) {
+  const supabase = await createClient();
+  try {
+    const input = verifySignupCodeSchema.parse(values(formData));
+    const { data, error } = await supabase.auth.verifyOtp({
+      email: input.email,
+      token: input.token,
+      type: "email"
+    });
+    if (error) throw error;
+
+    if (data.user) {
+      const fallbackName = typeof data.user.user_metadata?.name === "string" && data.user.user_metadata.name.trim()
+        ? data.user.user_metadata.name
+        : data.user.email?.split("@")[0] ?? "Jogador";
+
+      const { error: profileError } = await supabase.from("profiles").upsert({
+        id: data.user.id,
+        name: fallbackName,
+        email: data.user.email ?? ""
+      });
+
+      if (profileError) throw profileError;
+    }
+  } catch (error) {
+    return actionError(error);
+  }
+
+  redirect("/criar-senha");
 }
 
 export async function signInAction(_: unknown, formData: FormData) {

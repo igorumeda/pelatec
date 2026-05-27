@@ -10,6 +10,11 @@ export const loginSchema = z.object({
 
 export const signupSchema = loginSchema.extend({
   name: z.string().trim().min(2, "Informe seu nome")
+}).omit({ password: true });
+
+export const verifySignupCodeSchema = z.object({
+  email: z.string().email("E-mail invÃ¡lido"),
+  token: z.string().trim().min(6, "Informe o codigo enviado por e-mail")
 });
 
 export const passwordRecoverySchema = z.object({
