@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { unstable_noStore as noStore } from "next/cache";
-import { Dumbbell } from "lucide-react";
+import { Sparkles } from "lucide-react";
+import { BrandLogo } from "@/components/brand-logo";
 import { NotificationsMenu, UserMenu } from "@/components/header-menus";
 import { getUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
@@ -9,7 +10,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Pelatec",
-  description: "Organização de peladas de futebol"
+  description: "Organização de peladas, conexão entre jogadores e futebol amador mais organizado."
 };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
@@ -100,14 +101,16 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   return (
     <html lang="pt-BR">
       <body>
-        <header className="sticky top-0 z-20 border-b border-zinc-200 bg-white/90 backdrop-blur">
-          <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
-            <Link href={user ? "/dashboard" : "/"} className="flex items-center gap-2 font-bold text-ink">
-              <span className="flex h-9 w-9 items-center justify-center rounded-md bg-field-600 text-white">
-                <Dumbbell size={18} />
-              </span>
-              Pelatec
+        <header className="sticky top-0 z-20 border-b border-brand-700/80 bg-brand-950/92 backdrop-blur">
+          <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3">
+            <Link href={user ? "/dashboard" : "/"} className="flex items-center gap-3 text-white">
+              <BrandLogo variant="icon" className="h-10 w-10 shrink-0" />
+              <div className="hidden sm:block">
+                <p className="text-lg font-extrabold leading-none tracking-tight">Pelatec</p>
+                <p className="mt-1 text-[11px] uppercase tracking-[0.22em] text-slate-200">Organize, conecte e jogue</p>
+              </div>
             </Link>
+
             <nav className="flex items-center gap-2">
               {user && profile ? (
                 <>
@@ -116,10 +119,11 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                 </>
               ) : (
                 <>
-                  <Link className="rounded-md px-3 py-2 text-sm font-medium hover:bg-zinc-100" href="/login">
+                  <Link className="rounded-xl px-3 py-2 text-sm font-medium text-white hover:bg-white/10 hover:text-white" href="/login">
                     Entrar
                   </Link>
-                  <Link className="rounded-md bg-field-600 px-3 py-2 text-sm font-semibold text-white" href="/signup">
+                  <Link className="inline-flex items-center gap-2 rounded-xl bg-field-500 px-4 py-2.5 text-sm font-semibold text-white hover:bg-field-600" href="/signup">
+                    <Sparkles size={16} />
                     Criar conta
                   </Link>
                 </>
@@ -127,7 +131,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             </nav>
           </div>
         </header>
-        <main className="mx-auto min-h-[calc(100vh-64px)] max-w-6xl px-4 py-8">{children}</main>
+
+        <main className="mx-auto min-h-[calc(100vh-72px)] max-w-7xl px-4 py-8 sm:py-10">{children}</main>
       </body>
     </html>
   );

@@ -74,22 +74,32 @@ export default async function DashboardPage() {
 
   return (
     <>
-      <PageHeader
-        title="Painel"
-        description="Seu resumo de peladas, proximas rodadas e notificacoes."
-        action={<LinkButton href="/peladas/nova"><Plus size={16} /> Criar pelada</LinkButton>}
-      />
+      <section className="surface-dark px-6 py-7 sm:px-8">
+        <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+          <div className="max-w-3xl">
+            <p className="section-kicker text-field-200">Seu centro de controle</p>
+            <h1 className="mt-2 text-4xl font-extrabold tracking-tight text-white">Painel</h1>
+            <p className="mt-3 text-base leading-7 text-slate-200">
+              Veja suas peladas, próximas rodadas, cobranças e aprovações num resumo rápido para tocar a semana.
+            </p>
+          </div>
+          <LinkButton href="/peladas/nova">
+            <Plus size={16} />
+            Criar pelada
+          </LinkButton>
+        </div>
+      </section>
 
-      <div className="grid gap-4 sm:grid-cols-4">
-        <Stat label="Peladas" value={memberships?.length ?? 0} />
-        <Stat label="Proximas rodadas" value={rounds?.length ?? 0} />
-        <Stat label="Cobrancas abertas" value={myCharges?.length ?? 0} />
-        <Stat label="Pagamentos para aprovar" value={adminPayments?.length ?? 0} />
+      <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <Stat label="Peladas" value={memberships?.length ?? 0} description="Grupos em que você participa" />
+        <Stat label="Próximas rodadas" value={rounds?.length ?? 0} description="Rodadas futuras no radar" />
+        <Stat label="Cobranças abertas" value={myCharges?.length ?? 0} description="Pendências para você resolver" />
+        <Stat label="Pagamentos para aprovar" value={adminPayments?.length ?? 0} description="Envios aguardando revisão" />
       </div>
 
       <div className="mt-6 grid gap-6 lg:grid-cols-2">
         <Card>
-          <CardTitle icon={Bell}>Notificacoes financeiras</CardTitle>
+          <CardTitle icon={Bell}>Notificações financeiras</CardTitle>
           <div className="mt-4 space-y-4">
             {myCharges?.map((charge: any) => {
               const chargePayments = paymentsByCharge.get(charge.id) ?? [];
@@ -97,14 +107,20 @@ export default async function DashboardPage() {
               const pending = chargePayments.find((payment: any) => payment.status === "pending");
 
               return (
-                <div key={charge.id} className="rounded-md border border-zinc-200 p-4">
+                <div key={charge.id} className="rounded-2xl border border-slate-200 bg-slate-50/70 p-4">
                   <div className="flex items-start gap-3">
-                    <CircleDollarSign className="mt-1 text-field-700" size={18} />
-                    <div>
-                      <p className="font-medium">{charge.peladas?.name}: {charge.description}</p>
-                      <p className="text-sm text-zinc-600">{brl(charge.amount)} - competencia {competenceLabel(charge.competence)}</p>
-                      {charge.pix_code ? <p className="mt-2 rounded-md bg-zinc-50 p-2 text-xs text-zinc-700">Pix: {charge.pix_code}</p> : null}
-                      {pending ? <p className="mt-2 text-sm text-zinc-600">Pagamento enviado e aguardando aprovacao.</p> : null}
+                    <span className="mt-1 inline-flex h-9 w-9 items-center justify-center rounded-xl bg-field-50 text-field-700">
+                      <CircleDollarSign size={18} />
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <p className="font-semibold text-slate-900">
+                        {charge.peladas?.name}: {charge.description}
+                      </p>
+                      <p className="mt-1 text-sm text-slate-600">
+                        {brl(charge.amount)} • competência {competenceLabel(charge.competence)}
+                      </p>
+                      {charge.pix_code ? <p className="mt-2 rounded-xl bg-white px-3 py-2 text-xs text-slate-700">Pix: {charge.pix_code}</p> : null}
+                      {pending ? <p className="mt-2 text-sm text-slate-600">Pagamento enviado e aguardando aprovação.</p> : null}
                       {rejected ? <p className="mt-2 text-sm text-red-700">Pagamento rejeitado: {rejected.rejection_reason ?? "sem motivo informado"}</p> : null}
                     </div>
                   </div>
@@ -112,22 +128,22 @@ export default async function DashboardPage() {
                 </div>
               );
             })}
-            {!myCharges?.length ? <p className="text-sm text-zinc-600">Nenhuma cobranca aberta.</p> : null}
+            {!myCharges?.length ? <p className="text-sm text-slate-600">Nenhuma cobrança aberta.</p> : null}
           </div>
         </Card>
 
         <Card>
-          <CardTitle icon={ShieldCheck}>Aprovacoes pendentes</CardTitle>
+          <CardTitle icon={ShieldCheck}>Aprovações pendentes</CardTitle>
           <div className="mt-4 space-y-3">
             {adminPayments?.map((payment: any) => (
-              <Link key={payment.id} href={`/peladas/${payment.pelada_id}/financeiro`} className="block rounded-md border border-zinc-200 p-4 hover:bg-zinc-50">
-                <p className="font-medium">{profileName.get(payment.user_id) ?? "Jogador"} enviou pagamento</p>
-                <p className="text-sm text-zinc-600">
-                  {peladaName.get(payment.pelada_id)} - {chargeById.get(payment.charge_id)?.description ?? "Cobranca"} - {brl(payment.amount)}
+              <Link key={payment.id} href={`/peladas/${payment.pelada_id}/financeiro`} className="block rounded-2xl border border-slate-200 p-4 hover:bg-slate-50">
+                <p className="font-semibold text-slate-900">{profileName.get(payment.user_id) ?? "Jogador"} enviou pagamento</p>
+                <p className="mt-1 text-sm text-slate-600">
+                  {peladaName.get(payment.pelada_id)} • {chargeById.get(payment.charge_id)?.description ?? "Cobrança"} • {brl(payment.amount)}
                 </p>
               </Link>
             ))}
-            {!adminPayments?.length ? <p className="text-sm text-zinc-600">Nenhum pagamento pendente de aprovacao.</p> : null}
+            {!adminPayments?.length ? <p className="text-sm text-slate-600">Nenhum pagamento pendente de aprovação.</p> : null}
           </div>
         </Card>
       </div>
@@ -137,15 +153,15 @@ export default async function DashboardPage() {
           <CardTitle icon={UsersRound}>Minhas peladas</CardTitle>
           <div className="mt-4 space-y-3">
             {!memberships?.length ? (
-              <EmptyState title="Nenhuma pelada ainda" description="Crie a primeira pelada para comecar." />
+              <EmptyState title="Nenhuma pelada ainda" description="Crie a primeira pelada para começar." />
             ) : (
               memberships.map((row: any) => (
-                <Link key={row.peladas.id} className="block rounded-md border border-zinc-200 p-4 hover:bg-zinc-50" href={`/peladas/${row.peladas.id}`}>
+                <Link key={row.peladas.id} className="block rounded-2xl border border-slate-200 p-4 hover:bg-slate-50" href={`/peladas/${row.peladas.id}`}>
                   <div className="flex items-center justify-between gap-3">
-                    <span className="font-medium">{row.peladas.name}</span>
-                    <span className="text-xs uppercase text-zinc-500">{memberRoleLabel(row.role)}</span>
+                    <span className="font-semibold text-slate-900">{row.peladas.name}</span>
+                    <span className="rounded-full bg-field-50 px-2.5 py-1 text-xs font-semibold uppercase text-field-700">{memberRoleLabel(row.role)}</span>
                   </div>
-                  <p className="mt-1 text-sm text-zinc-600">{row.peladas.venue ?? "Local nao informado"}</p>
+                  <p className="mt-1 text-sm text-slate-600">{row.peladas.venue ?? "Local não informado"}</p>
                 </Link>
               ))
             )}
@@ -153,15 +169,17 @@ export default async function DashboardPage() {
         </Card>
 
         <Card>
-          <CardTitle icon={CalendarPlus}>Proximas rodadas</CardTitle>
+          <CardTitle icon={CalendarPlus}>Próximas rodadas</CardTitle>
           <div className="mt-4 space-y-3">
             {!rounds?.length ? (
               <EmptyState title="Sem rodadas agendadas" />
             ) : (
               rounds.map((round: any) => (
-                <Link key={round.id} href={`/rodadas/${round.id}`} className="block rounded-md border border-zinc-200 p-4 hover:bg-zinc-50">
-                  <p className="font-medium">{round.title ?? round.peladas.name}</p>
-                  <p className="text-sm text-zinc-600">{dateLabel(round.round_date)} as {round.starts_at.slice(0, 5)}</p>
+                <Link key={round.id} href={`/rodadas/${round.id}`} className="block rounded-2xl border border-slate-200 p-4 hover:bg-slate-50">
+                  <p className="font-semibold text-slate-900">{round.title ?? round.peladas.name}</p>
+                  <p className="mt-1 text-sm text-slate-600">
+                    {dateLabel(round.round_date)} às {round.starts_at.slice(0, 5)}
+                  </p>
                 </Link>
               ))
             )}
