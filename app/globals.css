@@ -4,8 +4,9 @@
 
 :root {
   color-scheme: light;
-  --page-bg: #f4f7fb;
-  --page-ink: #0f172a;
+  --page-bg: #0a1628;
+  --page-bg-secondary: #0f1f3a;
+  --page-ink: #e5edf7;
 }
 
 html {
@@ -15,21 +16,22 @@ html {
 body {
   min-height: 100vh;
   background:
-    radial-gradient(circle at top, rgba(16, 185, 129, 0.08), transparent 26%),
-    linear-gradient(180deg, #f7fbff 0%, var(--page-bg) 38%, #eef3f9 100%);
+    radial-gradient(circle at top, rgba(16, 185, 129, 0.12), transparent 24%),
+    radial-gradient(circle at 85% 12%, rgba(251, 191, 36, 0.08), transparent 18%),
+    linear-gradient(180deg, var(--page-bg) 0%, var(--page-bg-secondary) 42%, var(--page-bg) 100%);
   color: var(--page-ink);
   font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
 ::selection {
-  background: rgba(16, 185, 129, 0.18);
-  color: #0f1f3a;
+  background: rgba(251, 191, 36, 0.42);
+  color: #ffffff;
 }
 
 input,
 textarea,
 select {
-  @apply w-full rounded-xl border border-slate-200 bg-white/95 px-3.5 py-2.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-field-500 focus:ring-4 focus:ring-field-100/70;
+  @apply w-full rounded-xl border border-panel-200 bg-panel-50 px-3.5 py-2.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-field-500 focus:ring-4 focus:ring-field-100/70;
 }
 
 label {
@@ -43,7 +45,8 @@ button {
 
 @layer utilities {
   .surface-panel {
-    @apply rounded-3xl border border-white/70 bg-white/90 shadow-soft backdrop-blur-sm;
+    @apply rounded-3xl border border-panel-200/80 bg-panel-50 shadow-soft backdrop-blur-sm;
+    background-color: rgba(245, 248, 253, 0.94);
   }
 
   .surface-dark {

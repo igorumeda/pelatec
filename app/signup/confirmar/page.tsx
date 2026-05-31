@@ -16,11 +16,10 @@ export default async function ConfirmSignupPage({
 
   return (
     <div className="mx-auto max-w-md">
-      <PageHeader
-        title="Confirmar codigo"
-        description={`Enviamos um codigo para ${email}.`}
-        action={<BackLink href="/signup">Voltar ao cadastro</BackLink>}
-      />
+      <div className="mb-4">
+        <BackLink href="/signup">Voltar ao cadastro</BackLink>
+      </div>
+      <PageHeader title="Confirmar codigo" description={`Enviamos um codigo para ${email}.`} theme="dark" />
       <Card>
         <CardTitle icon={ShieldCheck}>Verificacao por e-mail</CardTitle>
         <ActionStateForm action={verifySignupCodeAction} submitLabel="Validar codigo">

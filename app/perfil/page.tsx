@@ -12,11 +12,10 @@ export default async function ProfilePage() {
 
   return (
     <div className="mx-auto max-w-2xl">
-      <PageHeader
-        title="Perfil"
-        description="Atualize seus dados basicos de jogador."
-        action={<BackLink href="/dashboard">Voltar ao painel</BackLink>}
-      />
+      <div className="mb-4">
+        <BackLink href="/dashboard">Voltar ao painel</BackLink>
+      </div>
+      <PageHeader title="Perfil" description="Atualize seus dados basicos de jogador." theme="dark" />
       <Card>
         <CardTitle icon={UserCircle2}>Dados do perfil</CardTitle>
         <ActionStateForm action={updateProfileAction}>

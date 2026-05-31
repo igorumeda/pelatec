@@ -17,20 +17,19 @@ export default async function PeladasPage() {
   return (
     <>
       <section className="surface-dark px-6 py-7 sm:px-8">
+        <div className="mb-4">
+          <BackLink href="/dashboard">Voltar ao painel</BackLink>
+        </div>
         <PageHeader
           title="Peladas"
           description="Todas as peladas em que você participa, com contexto rápido para voltar ao que importa."
           action={
-            <div className="flex flex-wrap gap-3">
-              <BackLink href="/dashboard" className="border-white/20 bg-white/10 text-white hover:bg-white/15 hover:text-white">
-                Voltar ao painel
-              </BackLink>
-              <LinkButton href="/peladas/nova">
-                <Plus size={16} />
-                Nova pelada
-              </LinkButton>
-            </div>
+            <LinkButton href="/peladas/nova">
+              <Plus size={16} />
+              Nova pelada
+            </LinkButton>
           }
+          theme="dark"
         />
       </section>
 

@@ -34,18 +34,18 @@ export function PresenceControls({
         <PresenceButton action={formAction} roundId={roundId} userId={userId} status="pending" currentStatus={currentStatus} icon={<Clock size={16} />} />
       </div>
       <div className="mt-3 flex flex-wrap items-center gap-2 text-sm">
-        <span className="text-zinc-600">Status atual:</span>
+        <span className="text-slate-700">Status atual:</span>
         <span
           className={cn(
-            "rounded-md px-2 py-1 font-semibold",
+            "rounded-xl px-2.5 py-1 font-semibold",
             currentStatus === "confirmed" && "bg-field-100 text-field-700",
             currentStatus === "declined" && "bg-red-50 text-red-700",
-            currentStatus === "pending" && "bg-zinc-100 text-zinc-700"
+            currentStatus === "pending" && "bg-slate-100 text-slate-700"
           )}
         >
           {labels[currentStatus]}
         </span>
-        {state?.message ? <span className={state.ok ? "text-field-700" : "text-red-600"}>{state.message}</span> : null}
+        {state?.message ? <span className={state.ok ? "font-medium text-field-700" : "font-medium text-red-700"}>{state.message}</span> : null}
       </div>
     </div>
   );
@@ -76,8 +76,8 @@ function PresenceButton({
       <button
         type="submit"
         className={cn(
-          "inline-flex min-h-10 items-center justify-center gap-2 rounded-md border px-4 py-2 text-sm font-semibold transition",
-          active ? "border-field-600 bg-field-600 text-white" : "border-zinc-300 bg-white text-zinc-800 hover:bg-zinc-50"
+          "inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border px-4 py-2 text-sm font-semibold transition",
+          active ? "border-field-600 bg-field-600 text-white" : "border-slate-300 bg-white text-slate-800 hover:bg-slate-50"
         )}
       >
         {icon}

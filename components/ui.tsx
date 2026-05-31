@@ -13,7 +13,7 @@ export function Button({
       className={cn(
         "inline-flex min-h-11 items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-60",
         variant === "primary" && "bg-field-500 text-white shadow-sm hover:bg-field-600",
-        variant === "secondary" && "border border-slate-200 bg-white text-slate-800 shadow-sm hover:border-brand-700/25 hover:bg-slate-50",
+        variant === "secondary" && "border border-panel-200 bg-panel-50 text-slate-800 shadow-sm hover:border-brand-700/25 hover:bg-panel-100",
         variant === "danger" && "bg-red-600 text-white shadow-sm hover:bg-red-700",
         className
       )}
@@ -32,7 +32,7 @@ export function LinkButton({
       className={cn(
         "inline-flex min-h-11 items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition",
         variant === "primary" && "bg-field-500 text-white shadow-sm hover:bg-field-600",
-        variant === "secondary" && "border border-slate-200 bg-white text-slate-800 shadow-sm hover:border-brand-700/25 hover:bg-slate-50",
+        variant === "secondary" && "border border-panel-200 bg-panel-50 text-slate-800 shadow-sm hover:border-brand-700/25 hover:bg-panel-100",
         className
       )}
       {...props}
@@ -47,10 +47,17 @@ export function BackLink({
   ...props
 }: Omit<ComponentProps<typeof Link>, "href"> & { href: string; children?: ReactNode }) {
   return (
-    <LinkButton href={href} variant="secondary" className={cn("gap-2", className)} {...props}>
+    <Link
+      href={href}
+      className={cn(
+        "inline-flex items-center gap-2 text-sm font-semibold text-slate-200 hover:text-white",
+        className
+      )}
+      {...props}
+    >
       <ArrowLeft size={16} />
       {children}
-    </LinkButton>
+    </Link>
   );
 }
 
@@ -69,7 +76,7 @@ export function CardTitle({
 }) {
   return (
     <h2 className={cn("flex items-center gap-2.5 font-semibold text-slate-900", className)}>
-      <span className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-field-50 text-field-700">
+      <span className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-white/70 text-field-700 shadow-sm">
         <Icon size={18} className="text-field-700" />
       </span>
       <span>{children}</span>
@@ -103,7 +110,7 @@ export function PageHeader({
 
 export function EmptyState({ title, description }: { title: string; description?: string }) {
   return (
-    <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50/80 p-8 text-center">
+    <div className="rounded-2xl border border-dashed border-panel-200 bg-panel-100/75 p-8 text-center">
       <h2 className="font-semibold text-slate-900">{title}</h2>
       {description ? <p className="mt-2 text-sm text-slate-600">{description}</p> : null}
     </div>
@@ -122,7 +129,7 @@ export function Field({ label, children }: { label: string; children: ReactNode 
 export function Stat({ label, value, description }: { label: string; value: ReactNode; description?: ReactNode }) {
   return (
     <Card className="relative overflow-hidden">
-      <div className="absolute right-0 top-0 h-20 w-20 rounded-full bg-field-100/60 blur-2xl" />
+      <div className="absolute right-0 top-0 h-20 w-20 rounded-full bg-brand-700/10 blur-2xl" />
       <p className="relative text-sm font-medium text-slate-600">{label}</p>
       <p className="relative mt-2 text-3xl font-extrabold tracking-tight text-brand-950">{value}</p>
       {description ? <p className="relative mt-1 text-xs text-slate-500">{description}</p> : null}

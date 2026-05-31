@@ -62,14 +62,14 @@ export function BulkChargeForm({ peladaId, members }: { peladaId: string; member
       <Field label="Valor"><input name="amount" type="number" min="0.01" step="0.01" required /></Field>
       <Field label="Pix"><textarea name="pix_code" rows={2} placeholder="Chave Pix ou código copia e cola" /></Field>
 
-      <div className="rounded-md border border-zinc-200 p-3">
-        <label className="flex items-center gap-2 text-sm font-semibold">
+      <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-3">
+        <label className="flex items-center gap-2 text-sm font-semibold text-slate-900">
           <input className="h-4 w-4" type="checkbox" checked={allSelected} onChange={toggleAll} />
           Selecionar/desselecionar todos
         </label>
         <div className="mt-3 grid gap-2 sm:grid-cols-2">
           {members.map((member) => (
-            <label key={member.user_id} className="flex items-center gap-2 rounded-md bg-zinc-50 p-2 text-sm">
+            <label key={member.user_id} className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white p-2.5 text-sm text-slate-700">
               <input
                 className="h-4 w-4"
                 type="checkbox"

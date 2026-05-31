@@ -67,7 +67,7 @@ export function DrawBoard({ roundId, players }: { roundId: string; players: Play
 
   return (
     <Card>
-      <h2 className="font-semibold">Sorteio de times</h2>
+      <h2 className="font-semibold text-slate-900">Sorteio de times</h2>
       <div className="mt-4 grid gap-4 sm:grid-cols-2">
         <Field label="Quantidade de times">
           <input type="number" min={2} value={teamCount} onChange={(event) => setTeamCount(Number(event.target.value))} />
@@ -78,12 +78,12 @@ export function DrawBoard({ roundId, players }: { roundId: string; players: Play
       </div>
       <div className="mt-4 grid gap-2 sm:grid-cols-2">
         {!players.length ? (
-          <p className="rounded-md border border-dashed border-zinc-300 p-4 text-sm text-zinc-600 sm:col-span-2">
+          <p className="rounded-2xl border border-dashed border-slate-300 bg-slate-50/80 p-4 text-sm text-slate-600 sm:col-span-2">
             Nenhum jogador confirmado para sortear.
           </p>
         ) : null}
         {players.map((player) => (
-          <label key={player.id} className="flex items-center gap-2 rounded-md border border-zinc-200 bg-white p-3 text-sm">
+          <label key={player.id} className="flex items-center gap-2 rounded-2xl border border-slate-200 bg-white p-3 text-sm text-slate-700">
             <input className="h-4 w-4" type="checkbox" checked={selected.includes(player.id)} onChange={() => toggle(player.id)} />
             {player.name}
           </label>
@@ -93,15 +93,15 @@ export function DrawBoard({ roundId, players }: { roundId: string; players: Play
         <Button type="button" onClick={draw}><Shuffle size={16} /> Sortear</Button>
         <Button type="button" variant="secondary" disabled={!teams.length || isPending} onClick={save}><Save size={16} /> Salvar sorteio</Button>
       </div>
-      {message ? <p className="mt-3 text-sm text-field-700">{message}</p> : null}
+      {message ? <p className="mt-3 text-sm font-medium text-field-700">{message}</p> : null}
       {teams.length ? (
         <div className="mt-5 grid gap-3 sm:grid-cols-2">
           {teams.map((team, teamIndex) => (
-            <div key={team.name} className="rounded-md border border-zinc-200 p-4">
-              <h3 className="font-semibold">{team.name}</h3>
-              <div className="mt-3 space-y-2 text-sm text-zinc-700">
+            <div key={team.name} className="rounded-2xl border border-slate-200 p-4">
+              <h3 className="font-semibold text-slate-900">{team.name}</h3>
+              <div className="mt-3 space-y-2 text-sm text-slate-700">
                 {team.players.map((player) => (
-                  <div key={player.id} className="flex items-center justify-between gap-2 rounded-md bg-zinc-50 px-3 py-2">
+                  <div key={player.id} className="flex items-center justify-between gap-2 rounded-xl bg-slate-50 px-3 py-2">
                     <span>{player.name}</span>
                     <select
                       aria-label={`Mover ${player.name}`}
@@ -117,7 +117,7 @@ export function DrawBoard({ roundId, players }: { roundId: string; players: Play
                     </select>
                   </div>
                 ))}
-                {!team.players.length ? <p className="text-zinc-500">Sem jogadores.</p> : null}
+                {!team.players.length ? <p className="text-slate-500">Sem jogadores.</p> : null}
               </div>
             </div>
           ))}

@@ -22,23 +22,22 @@ export default async function RoundsPage({ params }: { params: Promise<{ id: str
 
   return (
     <>
-      <PageHeader
-        title="Agenda"
-        description={`Rodadas da ${pelada?.name ?? "pelada"}.`}
-        action={<BackLink href={`/peladas/${id}`}>Voltar para a pelada</BackLink>}
-      />
+      <div className="mb-4">
+        <BackLink href={`/peladas/${id}`}>Voltar para a pelada</BackLink>
+      </div>
+      <PageHeader title="Agenda" description={`Rodadas da ${pelada?.name ?? "pelada"}.`} theme="dark" />
       <div className="grid gap-6 lg:grid-cols-[1fr_380px]">
         <Card>
           <CardTitle icon={CalendarDays}>Rodadas cadastradas</CardTitle>
           {!rounds?.length ? <EmptyState title="Nenhuma rodada criada" /> : null}
           <div className="mt-4 space-y-3">
             {rounds?.map((round: any) => (
-              <Link key={round.id} href={`/rodadas/${round.id}`} className="block rounded-md border border-zinc-200 p-4 hover:bg-zinc-50">
+              <Link key={round.id} href={`/rodadas/${round.id}`} className="block rounded-2xl border border-slate-200 p-4 hover:bg-slate-50">
                 <div className="flex items-center justify-between gap-3">
-                  <p className="font-medium">{round.title ?? "Rodada"}</p>
-                  <span className="rounded-md bg-zinc-100 px-2 py-1 text-xs uppercase">{roundStatusLabel(round.status)}</span>
+                  <p className="font-medium text-slate-900">{round.title ?? "Rodada"}</p>
+                  <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold uppercase text-slate-700">{roundStatusLabel(round.status)}</span>
                 </div>
-                <p className="mt-1 text-sm text-zinc-600">{dateLabel(round.round_date)} as {round.starts_at.slice(0, 5)}</p>
+                <p className="mt-1 text-sm text-slate-600">{dateLabel(round.round_date)} as {round.starts_at.slice(0, 5)}</p>
               </Link>
             ))}
           </div>

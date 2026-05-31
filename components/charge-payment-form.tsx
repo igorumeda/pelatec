@@ -24,7 +24,7 @@ export function ChargePaymentForm({ chargeId, amount }: { chargeId: string; amou
       <Field label="Observação">
         <textarea name="notes" rows={2} />
       </Field>
-      {state?.message ? <p className={state.ok ? "text-sm text-field-700" : "text-sm text-red-600"}>{state.message}</p> : null}
+      {state?.message ? <p className={state.ok ? "text-sm font-medium text-field-700" : "text-sm font-medium text-red-700"}>{state.message}</p> : null}
       <Button type="submit">Enviar pagamento</Button>
     </form>
   );

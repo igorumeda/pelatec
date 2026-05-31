@@ -7,11 +7,10 @@ export default async function NewPeladaPage() {
   await requireUser();
   return (
     <div className="mx-auto max-w-3xl">
-      <PageHeader
-        title="Nova pelada"
-        description="Configure os dados operacionais basicos. Voce sera o owner."
-        action={<BackLink href="/dashboard">Voltar ao painel</BackLink>}
-      />
+      <div className="mb-4">
+        <BackLink href="/dashboard">Voltar ao painel</BackLink>
+      </div>
+      <PageHeader title="Nova pelada" description="Configure os dados operacionais basicos. Voce sera o owner." theme="dark" />
       <Card>
         <ActionStateForm action={createPeladaAction} submitLabel="Criar pelada">
           <PeladaFields />

@@ -8,13 +8,10 @@ import {
   Clock3,
   MapPin,
   ReceiptText,
-  Rocket,
-  Settings,
-  UserPlus,
-  UsersRound,
-  Wallet
+  Settings
 } from "lucide-react";
 import { redirect } from "next/navigation";
+import { PeladaQuickActionsMenu } from "@/components/pelada-quick-actions-menu";
 import { BackLink, Card, CardTitle, EmptyState, LinkButton, PageHeader, Stat } from "@/components/ui";
 import { canManage, getMyRole, requireUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
@@ -152,15 +149,16 @@ export default async function PeladaDetailsPage({ params }: { params: Promise<{ 
 
   return (
     <>
+      <div className="mb-3 ml-2">
+        <BackLink href="/dashboard">Voltar ao painel</BackLink>
+      </div>
+
       <section className="surface-dark px-6 py-7 sm:px-8">
         <PageHeader
           title={pelada?.name ?? "Pelada"}
           description={pelada?.description ?? "Painel operacional da pelada."}
-          action={
-            <BackLink href="/dashboard" className="border-white/20 bg-white/10 text-white hover:bg-white/15 hover:text-white">
-              Voltar ao painel
-            </BackLink>
-          }
+          theme="dark"
+          action={<PeladaQuickActionsMenu peladaId={id} manageable={manageable} />}
         />
 
         {topMeta.length ? (
@@ -313,56 +311,6 @@ export default async function PeladaDetailsPage({ params }: { params: Promise<{ 
         </div>
 
         <aside className="space-y-6">
-          <Card>
-            <CardTitle icon={Rocket}>Ações rápidas</CardTitle>
-            <div className="mt-4 grid gap-3">
-              {manageable ? (
-                <LinkButton href={`/peladas/${id}/rodadas`}>
-                  <CalendarPlus2 size={16} />
-                  Agendar rodada
-                </LinkButton>
-              ) : null}
-              {manageable ? (
-                <LinkButton href={`/peladas/${id}/membros`} variant="secondary">
-                  <UserPlus size={16} />
-                  Adicionar membro
-                </LinkButton>
-              ) : null}
-              {manageable ? (
-                <LinkButton href={`/peladas/${id}/financeiro`} variant="secondary">
-                  <CircleDollarSign size={16} />
-                  Lançar pagamento
-                </LinkButton>
-              ) : null}
-              {manageable ? (
-                <LinkButton href={`/peladas/${id}/financeiro`} variant="secondary">
-                  <Wallet size={16} />
-                  Registrar despesa
-                </LinkButton>
-              ) : null}
-              <LinkButton href={`/peladas/${id}/rodadas`} variant="secondary">
-                <CalendarDays size={16} />
-                Ver agenda
-              </LinkButton>
-              <LinkButton href={`/peladas/${id}/membros`} variant="secondary">
-                <UsersRound size={16} />
-                Ver membros
-              </LinkButton>
-              {manageable ? (
-                <LinkButton href={`/peladas/${id}/financeiro`} variant="secondary">
-                  <ReceiptText size={16} />
-                  Ver financeiro
-                </LinkButton>
-              ) : null}
-              {manageable ? (
-                <LinkButton href={`/peladas/${id}/editar`} variant="secondary">
-                  <Settings size={16} />
-                  Editar dados
-                </LinkButton>
-              ) : null}
-            </div>
-          </Card>
-
           {manageable ? (
             <Card>
               <CardTitle icon={CircleDollarSign}>Resumo financeiro do mês</CardTitle>

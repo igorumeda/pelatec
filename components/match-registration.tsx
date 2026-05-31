@@ -88,12 +88,12 @@ export function MatchRegistration({ roundId, teams }: { roundId: string; teams: 
       {teamA && teamB ? (
         <div className="grid gap-3 lg:grid-cols-2">
           {[teamA, teamB].map((team) => (
-            <div key={team.id} className="rounded-md border border-zinc-200 p-4">
-              <h3 className="font-semibold">{team.name}</h3>
+            <div key={team.id} className="rounded-2xl border border-slate-200 p-4">
+              <h3 className="font-semibold text-slate-900">{team.name}</h3>
               <div className="mt-3 space-y-2">
                 {team.round_team_players?.map((player) => (
-                  <div key={player.user_id} className="grid grid-cols-[1fr_76px_76px] items-center gap-2 rounded-md bg-zinc-50 p-2">
-                    <span className="text-sm">{player.profiles?.name ?? "Jogador"}</span>
+                  <div key={player.user_id} className="grid grid-cols-[1fr_76px_76px] items-center gap-2 rounded-xl bg-slate-50 p-2">
+                    <span className="text-sm text-slate-700">{player.profiles?.name ?? "Jogador"}</span>
                     <label className="flex items-center gap-1" title="Gols pró">
                       <Goal size={16} className="text-field-700" />
                       <input
@@ -130,7 +130,7 @@ export function MatchRegistration({ roundId, teams }: { roundId: string; teams: 
       <Button type="button" disabled={!teamAId || !teamBId || teamAId === teamBId || isPending} onClick={submit}>
         {isPending ? "Registrando..." : "Registrar partida"}
       </Button>
-      {message ? <p className="text-sm text-field-700">{message}</p> : null}
+      {message ? <p className="text-sm font-medium text-field-700">{message}</p> : null}
     </div>
   );
 }

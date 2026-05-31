@@ -49,11 +49,10 @@ export default async function FinancePage({ params }: { params: Promise<{ id: st
 
   return (
     <>
-      <PageHeader
-        title="Financeiro"
-        description="Cobrancas, pagamentos, despesas e saldo por competencia."
-        action={<BackLink href={`/peladas/${id}`}>Voltar para a pelada</BackLink>}
-      />
+      <div className="mb-4">
+        <BackLink href={`/peladas/${id}`}>Voltar para a pelada</BackLink>
+      </div>
+      <PageHeader title="Financeiro" description="Cobrancas, pagamentos, despesas e saldo por competencia." theme="dark" />
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
         <Stat label="Saldo de lancamentos" value={brl(entryBalance)} />
@@ -66,27 +65,27 @@ export default async function FinancePage({ params }: { params: Promise<{ id: st
       <Card className="mt-6">
         <CardTitle icon={ReceiptText}>Relatorio por competencia</CardTitle>
         <div className="mt-4 overflow-x-auto">
-          <table className="min-w-full border-separate border-spacing-0 overflow-hidden rounded-md border border-zinc-200 text-sm">
-            <thead className="bg-zinc-50 text-left text-zinc-600">
+          <table className="min-w-full border-separate border-spacing-0 overflow-hidden rounded-2xl border border-slate-200 text-sm">
+            <thead className="bg-slate-50 text-left text-slate-700">
               <tr>
-                <th className="border-b border-zinc-200 px-4 py-3 font-semibold">Competencia</th>
-                <th className="border-b border-zinc-200 px-4 py-3 font-semibold">Cobrado</th>
-                <th className="border-b border-zinc-200 px-4 py-3 font-semibold">Pago</th>
-                <th className="border-b border-zinc-200 px-4 py-3 font-semibold">Despesas</th>
+                <th className="border-b border-slate-200 px-4 py-3 font-semibold">Competencia</th>
+                <th className="border-b border-slate-200 px-4 py-3 font-semibold">Cobrado</th>
+                <th className="border-b border-slate-200 px-4 py-3 font-semibold">Pago</th>
+                <th className="border-b border-slate-200 px-4 py-3 font-semibold">Despesas</th>
               </tr>
             </thead>
             <tbody>
               {Object.entries(grouped).map(([competence, group]) => (
                 <tr key={competence} className="bg-white">
-                  <td className="border-b border-zinc-100 px-4 py-3 font-medium text-zinc-900">{competenceLabel(competence)}</td>
-                  <td className="border-b border-zinc-100 px-4 py-3">{brl(group.charged)}</td>
-                  <td className="border-b border-zinc-100 px-4 py-3 text-field-700">{brl(group.paid)}</td>
-                  <td className="border-b border-zinc-100 px-4 py-3 text-red-700">{brl(group.expenses)}</td>
+                  <td className="border-b border-slate-100 px-4 py-3 font-medium text-slate-900">{competenceLabel(competence)}</td>
+                  <td className="border-b border-slate-100 px-4 py-3 text-slate-700">{brl(group.charged)}</td>
+                  <td className="border-b border-slate-100 px-4 py-3 font-medium text-field-700">{brl(group.paid)}</td>
+                  <td className="border-b border-slate-100 px-4 py-3 font-medium text-red-700">{brl(group.expenses)}</td>
                 </tr>
               ))}
               {!Object.keys(grouped).length ? (
                 <tr>
-                  <td colSpan={4} className="px-4 py-6 text-center text-zinc-500">Nenhum dado agrupado por competencia ainda.</td>
+                  <td colSpan={4} className="px-4 py-6 text-center text-slate-500">Nenhum dado agrupado por competencia ainda.</td>
                 </tr>
               ) : null}
             </tbody>
@@ -114,12 +113,12 @@ export default async function FinancePage({ params }: { params: Promise<{ id: st
                 <CardTitle icon={ClipboardList}>Resumo dos lancamentos</CardTitle>
                 <div className="mt-4 space-y-2">
                   {entries?.slice(0, 5).map((entry: any) => (
-                    <div key={entry.id} className="flex justify-between gap-3 rounded-md border border-zinc-200 p-3 text-sm">
-                      <span>{entry.description}<br /><span className="text-zinc-500">{dateLabel(entry.entry_date)}</span></span>
+                    <div key={entry.id} className="flex justify-between gap-3 rounded-2xl border border-slate-200 p-3 text-sm">
+                      <span className="text-slate-700">{entry.description}<br /><span className="text-slate-500">{dateLabel(entry.entry_date)}</span></span>
                       <strong className={entry.type === "revenue" ? "text-field-700" : "text-red-600"}>{entry.type === "revenue" ? "+" : "-"}{brl(entry.amount)}</strong>
                     </div>
                   ))}
-                  {!entries?.length ? <p className="text-sm text-zinc-600">Nenhum lancamento ainda.</p> : null}
+                  {!entries?.length ? <p className="text-sm text-slate-600">Nenhum lancamento ainda.</p> : null}
                 </div>
               </Card>
             </div>
@@ -128,8 +127,8 @@ export default async function FinancePage({ params }: { params: Promise<{ id: st
               <CardTitle icon={Banknote}>Lancamentos</CardTitle>
               <div className="mt-4 space-y-2">
                 {entries?.map((entry: any) => (
-                  <div key={entry.id} className="flex justify-between gap-3 rounded-md border border-zinc-200 p-3 text-sm">
-                    <span>{entry.description}<br /><span className="text-zinc-500">{dateLabel(entry.entry_date)}</span></span>
+                  <div key={entry.id} className="flex justify-between gap-3 rounded-2xl border border-slate-200 p-3 text-sm">
+                    <span className="text-slate-700">{entry.description}<br /><span className="text-slate-500">{dateLabel(entry.entry_date)}</span></span>
                     <strong className={entry.type === "revenue" ? "text-field-700" : "text-red-600"}>{entry.type === "revenue" ? "+" : "-"}{brl(entry.amount)}</strong>
                   </div>
                 ))}
@@ -149,40 +148,40 @@ export default async function FinancePage({ params }: { params: Promise<{ id: st
                 <CardTitle icon={BellRing}>Pagamentos aguardando aprovacao</CardTitle>
                 <div className="mt-4 space-y-3">
                   {pendingPayments.map((payment: any) => (
-                    <div key={payment.id} className="rounded-md border border-zinc-200 p-3 text-sm">
+                    <div key={payment.id} className="rounded-2xl border border-slate-200 p-3 text-sm">
                       <div className="flex items-start justify-between gap-3">
                         <div>
-                          <strong>{memberName.get(payment.user_id) ?? "Jogador"}</strong>
-                          <p className="text-zinc-600">{chargeById.get(payment.charge_id)?.description ?? "Cobranca"} - {brl(payment.amount)}</p>
+                          <strong className="text-slate-900">{memberName.get(payment.user_id) ?? "Jogador"}</strong>
+                          <p className="text-slate-600">{chargeById.get(payment.charge_id)?.description ?? "Cobranca"} - {brl(payment.amount)}</p>
                           {payment.proof_url ? (
                             proofLinks.get(payment.id) ? (
                               <a className="mt-2 inline-flex text-xs font-semibold text-field-700 hover:underline" href={proofLinks.get(payment.id)} target="_blank" rel="noreferrer">
                                 Abrir comprovante
                               </a>
                             ) : (
-                              <p className="text-xs text-zinc-500">Comprovante indisponivel</p>
+                              <p className="text-xs text-slate-500">Comprovante indisponivel</p>
                             )
                           ) : null}
-                          {payment.notes ? <p className="text-xs text-zinc-500">{payment.notes}</p> : null}
+                          {payment.notes ? <p className="text-xs text-slate-500">{payment.notes}</p> : null}
                         </div>
                         <div className="flex gap-2">
                           <form action={reviewPaymentFormAction}>
                             <input type="hidden" name="payment_id" value={payment.id} />
                             <input type="hidden" name="pelada_id" value={id} />
                             <input type="hidden" name="status" value="approved" />
-                            <button className="rounded-md bg-field-600 p-2 text-white" aria-label="Aprovar"><Check size={16} /></button>
+                            <button className="rounded-xl bg-field-600 p-2 text-white" aria-label="Aprovar"><Check size={16} /></button>
                           </form>
                           <form action={reviewPaymentFormAction}>
                             <input type="hidden" name="payment_id" value={payment.id} />
                             <input type="hidden" name="pelada_id" value={id} />
                             <input type="hidden" name="status" value="rejected" />
-                            <button className="rounded-md bg-red-600 p-2 text-white" aria-label="Rejeitar"><X size={16} /></button>
+                            <button className="rounded-xl bg-red-600 p-2 text-white" aria-label="Rejeitar"><X size={16} /></button>
                           </form>
                         </div>
                       </div>
                     </div>
                   ))}
-                  {!pendingPayments.length ? <p className="text-sm text-zinc-600">Nenhum pagamento pendente.</p> : null}
+                  {!pendingPayments.length ? <p className="text-sm text-slate-600">Nenhum pagamento pendente.</p> : null}
                 </div>
               </Card>
             </div>
@@ -191,27 +190,27 @@ export default async function FinancePage({ params }: { params: Promise<{ id: st
               <CardTitle icon={Check}>Pagamentos efetuados</CardTitle>
               <div className="mt-4 space-y-2">
                 {approvedPayments.map((payment: any) => (
-                  <div key={payment.id} className="flex items-start justify-between gap-3 rounded-md border border-zinc-200 p-3 text-sm">
+                  <div key={payment.id} className="flex items-start justify-between gap-3 rounded-2xl border border-slate-200 p-3 text-sm">
                     <div>
-                      <strong>{memberName.get(payment.user_id) ?? "Jogador"}</strong>
-                      <p className="text-zinc-600">
+                      <strong className="text-slate-900">{memberName.get(payment.user_id) ?? "Jogador"}</strong>
+                      <p className="text-slate-600">
                         {chargeById.get(payment.charge_id)?.description ?? "Pagamento avulso"} - {brl(payment.amount)}
                       </p>
-                      <p className="text-xs text-zinc-500">
+                      <p className="text-xs text-slate-500">
                         Pago em {dateLabel(payment.paid_at)}
                       </p>
-                      {payment.notes ? <p className="mt-1 text-xs text-zinc-500">{payment.notes}</p> : null}
+                      {payment.notes ? <p className="mt-1 text-xs text-slate-500">{payment.notes}</p> : null}
                     </div>
                     <form action={cancelPaymentAction}>
                       <input type="hidden" name="payment_id" value={payment.id} />
                       <input type="hidden" name="pelada_id" value={id} />
-                      <button className="rounded-md border border-red-200 px-3 py-2 text-xs font-semibold text-red-700 hover:bg-red-50">
+                      <button className="rounded-xl border border-red-200 px-3 py-2 text-xs font-semibold text-red-700 hover:bg-red-50">
                         Cancelar
                       </button>
                     </form>
                   </div>
                 ))}
-                {!approvedPayments.length ? <p className="text-sm text-zinc-600">Nenhum pagamento efetuado ainda.</p> : null}
+                {!approvedPayments.length ? <p className="text-sm text-slate-600">Nenhum pagamento efetuado ainda.</p> : null}
               </div>
             </Card>
 
@@ -219,11 +218,11 @@ export default async function FinancePage({ params }: { params: Promise<{ id: st
               <CardTitle icon={WalletCards}>Cobrancas criadas</CardTitle>
               <div className="mt-4 space-y-2">
                 {charges?.map((charge: any) => (
-                  <div key={charge.id} className="flex items-start justify-between gap-3 rounded-md border border-zinc-200 p-3 text-sm">
+                  <div key={charge.id} className="flex items-start justify-between gap-3 rounded-2xl border border-slate-200 p-3 text-sm">
                     <div>
-                      <strong>{memberName.get(charge.user_id) ?? "Jogador"}</strong> - {charge.description}
-                      <p className="text-zinc-600">{brl(charge.amount)} - competencia {competenceLabel(charge.competence)}</p>
-                      <span className="mt-1 inline-flex rounded-md bg-zinc-100 px-2 py-1 text-xs font-semibold uppercase text-zinc-600">
+                      <strong className="text-slate-900">{memberName.get(charge.user_id) ?? "Jogador"}</strong> - <span className="text-slate-700">{charge.description}</span>
+                      <p className="text-slate-600">{brl(charge.amount)} - competencia {competenceLabel(charge.competence)}</p>
+                      <span className="mt-1 inline-flex rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold uppercase text-slate-700">
                         {chargeStatusLabel(charge.status)}
                       </span>
                     </div>
@@ -231,14 +230,14 @@ export default async function FinancePage({ params }: { params: Promise<{ id: st
                       <form action={cancelChargeAction}>
                         <input type="hidden" name="charge_id" value={charge.id} />
                         <input type="hidden" name="pelada_id" value={id} />
-                        <button className="rounded-md border border-red-200 px-3 py-2 text-xs font-semibold text-red-700 hover:bg-red-50">
+                        <button className="rounded-xl border border-red-200 px-3 py-2 text-xs font-semibold text-red-700 hover:bg-red-50">
                           Cancelar
                         </button>
                       </form>
                     ) : null}
                   </div>
                 ))}
-                {!charges?.length ? <p className="text-sm text-zinc-600">Nenhuma cobranca criada.</p> : null}
+                {!charges?.length ? <p className="text-sm text-slate-600">Nenhuma cobranca criada.</p> : null}
               </div>
             </Card>
           </div>

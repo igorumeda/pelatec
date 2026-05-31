@@ -1,3 +1,4 @@
+import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight, CalendarDays, CheckCircle2, CircleDollarSign, MapPin, Search, Shuffle, UserPlus, UsersRound } from "lucide-react";
 import { BrandLogo } from "@/components/brand-logo";
@@ -115,7 +116,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section className="space-y-6">
+      <section id="como-funciona" className="space-y-6">
         <div className="max-w-3xl">
           <p className="section-kicker">Como funciona</p>
           <h2 className="mt-2 text-3xl font-extrabold tracking-tight text-brand-950 sm:text-4xl">
@@ -249,6 +250,51 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
+
+      <footer className="overflow-hidden rounded-[2rem] border border-brand-700/70 bg-brand-950 text-white shadow-panel">
+        <div className="grid gap-8 px-6 py-8 lg:grid-cols-[1.2fr_0.8fr_0.8fr_0.8fr] lg:px-8">
+          <div>
+            <BrandLogo variant="full" theme="dark" className="h-12" />
+            <p className="mt-4 max-w-sm text-sm leading-7 text-slate-300">
+              Plataforma para organizar peladas, conectar jogadores ao jogo e dar mais clareza para quem toca a rodada toda semana.
+            </p>
+          </div>
+
+          <div>
+            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-field-300">Produto</p>
+            <div className="mt-4 space-y-3 text-sm text-slate-300">
+              <a href="#como-funciona" className="block hover:text-white">Como funciona</a>
+              <Link href={primaryHref} className="block hover:text-white">{primaryLabel}</Link>
+              <Link href="/login" className="block hover:text-white">Entrar</Link>
+            </div>
+          </div>
+
+          <div>
+            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-field-300">Operação</p>
+            <div className="mt-4 space-y-3 text-sm text-slate-300">
+              <span className="block">Agenda da pelada</span>
+              <span className="block">Confirmação de presença</span>
+              <span className="block">Financeiro simples</span>
+            </div>
+          </div>
+
+          <div>
+            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-field-300">Marca</p>
+            <div className="mt-4 space-y-3 text-sm text-slate-300">
+              <span className="block">Futebol amador</span>
+              <span className="block">Conexão</span>
+              <span className="block">Comunidade e tecnologia</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="border-t border-white/10 px-6 py-4 text-sm text-slate-400 lg:px-8">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <span>© 2026 Pelatec. Todos os direitos reservados.</span>
+            <span>Organize, conecte e jogue.</span>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }

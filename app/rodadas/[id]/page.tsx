@@ -73,10 +73,13 @@ export default async function RoundDetailsPage({ params }: { params: Promise<{ i
 
   return (
     <RoundPresenceProvider roundId={id} currentUserId={user.id} initialMembers={presenceMembers}>
+      <div className="mb-4">
+        {round?.pelada_id ? <BackLink href={`/peladas/${round.pelada_id}`}>Voltar para a pelada</BackLink> : <BackLink href="/dashboard">Voltar ao painel</BackLink>}
+      </div>
       <PageHeader
         title={round?.title ?? "Rodada"}
         description={round ? `${round.peladas?.name} - ${dateLabel(round.round_date)} as ${round.starts_at.slice(0, 5)}` : undefined}
-        action={round?.pelada_id ? <BackLink href={`/peladas/${round.pelada_id}`}>Voltar para a pelada</BackLink> : <BackLink href="/dashboard">Voltar ao painel</BackLink>}
+        theme="dark"
       />
 
       <div className="grid gap-6 lg:grid-cols-[1fr_380px]">
@@ -88,16 +91,16 @@ export default async function RoundDetailsPage({ params }: { params: Promise<{ i
             <CardTitle icon={Shield}>Times salvos</CardTitle>
             <div className="mt-4 grid gap-3 sm:grid-cols-2">
               {teams?.map((team: any) => (
-                <div key={team.id} className="rounded-md border border-zinc-200 p-4">
-                  <h3 className="font-semibold">{team.name}</h3>
-                  <ul className="mt-2 space-y-1 text-sm text-zinc-700">
+                <div key={team.id} className="rounded-2xl border border-slate-200 p-4">
+                  <h3 className="font-semibold text-slate-900">{team.name}</h3>
+                  <ul className="mt-2 space-y-1 text-sm text-slate-700">
                     {team.round_team_players?.map((player: any) => (
                       <li key={player.user_id}>{(Array.isArray(player.profiles) ? player.profiles[0] : player.profiles)?.name}</li>
                     ))}
                   </ul>
                 </div>
               ))}
-              {!teams?.length ? <p className="text-sm text-zinc-600">Nenhum sorteio salvo.</p> : null}
+              {!teams?.length ? <p className="text-sm text-slate-600">Nenhum sorteio salvo.</p> : null}
             </div>
           </Card>
 
@@ -107,7 +110,7 @@ export default async function RoundDetailsPage({ params }: { params: Promise<{ i
               <MatchRegistration roundId={id} teams={matchTeams} />
               <div className="mt-4 space-y-2">
                 {matches?.map((match: any) => (
-                  <div key={match.id} className="rounded-md border border-zinc-200 p-3 text-sm">
+                  <div key={match.id} className="rounded-2xl border border-slate-200 p-3 text-sm text-slate-700">
                     {match.team_a?.name ?? "Time A"} {match.team_a_score ?? "-"} x {match.team_b_score ?? "-"} {match.team_b?.name ?? "Time B"}
                   </div>
                 ))}

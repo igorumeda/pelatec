@@ -6,11 +6,10 @@ import { BackLink, Card, CardTitle, Field, PageHeader } from "@/components/ui";
 export default function UpdatePasswordPage() {
   return (
     <div className="mx-auto max-w-md">
-      <PageHeader
-        title="Nova senha"
-        description="Crie uma nova senha para continuar usando sua conta."
-        action={<BackLink href="/login">Voltar para entrar</BackLink>}
-      />
+      <div className="mb-4">
+        <BackLink href="/login">Voltar para entrar</BackLink>
+      </div>
+      <PageHeader title="Nova senha" description="Crie uma nova senha para continuar usando sua conta." theme="dark" />
       <Card>
         <CardTitle icon={KeyRound}>Atualizar senha</CardTitle>
         <ActionStateForm action={updatePasswordAction} submitLabel="Atualizar senha">

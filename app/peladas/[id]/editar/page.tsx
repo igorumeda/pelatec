@@ -17,7 +17,10 @@ export default async function EditPeladaPage({ params }: { params: Promise<{ id:
 
   return (
     <div className="mx-auto max-w-3xl">
-      <PageHeader title="Editar pelada" action={<BackLink href={`/peladas/${id}`}>Voltar para a pelada</BackLink>} />
+      <div className="mb-4">
+        <BackLink href={`/peladas/${id}`}>Voltar para a pelada</BackLink>
+      </div>
+      <PageHeader title="Editar pelada" theme="dark" />
       <Card>
         <CardTitle icon={Settings}>Configuracoes da pelada</CardTitle>
         <ActionStateForm action={action}>

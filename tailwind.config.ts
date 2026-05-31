@@ -30,11 +30,16 @@ const config: Config = {
           400: "#fbbf24",
           500: "#f59e0b"
         },
+        panel: {
+          50: "#f5f8fd",
+          100: "#eaf0f8",
+          200: "#d8e2f0"
+        },
         ink: "#0f172a",
         mist: "#f4f7fb"
       },
       boxShadow: {
-        soft: "0 20px 40px rgba(15, 31, 58, 0.08)",
+        soft: "0 20px 40px rgba(4, 17, 38, 0.18)",
         panel: "0 24px 60px rgba(15, 31, 58, 0.16)"
       }
     }

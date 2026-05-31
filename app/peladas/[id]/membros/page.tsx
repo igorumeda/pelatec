@@ -20,20 +20,19 @@ export default async function MembersPage({ params }: { params: Promise<{ id: st
 
   return (
     <>
-      <PageHeader
-        title="Membros"
-        description="Gerencie jogadores e administradores da pelada."
-        action={<BackLink href={`/peladas/${id}`}>Voltar para a pelada</BackLink>}
-      />
+      <div className="mb-4">
+        <BackLink href={`/peladas/${id}`}>Voltar para a pelada</BackLink>
+      </div>
+      <PageHeader title="Membros" description="Gerencie jogadores e administradores da pelada." theme="dark" />
       <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
         <Card>
           <CardTitle icon={UsersRound}>Lista de membros</CardTitle>
           <div className="mt-4 space-y-3">
             {members?.map((member: any) => (
-              <div key={member.user_id} className="flex flex-col gap-3 rounded-md border border-zinc-200 p-4 sm:flex-row sm:items-center sm:justify-between">
+              <div key={member.user_id} className="flex flex-col gap-3 rounded-2xl border border-slate-200 p-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                  <p className="font-medium">{member.profiles?.name}</p>
-                  <p className="text-sm text-zinc-600">{member.profiles?.email}</p>
+                  <p className="font-medium text-slate-900">{member.profiles?.name}</p>
+                  <p className="text-sm text-slate-600">{member.profiles?.email}</p>
                 </div>
                 {role === "owner" && member.role !== "owner" ? (
                   <form action={updateMemberRoleFormAction} className="flex gap-2">
@@ -46,7 +45,7 @@ export default async function MembersPage({ params }: { params: Promise<{ id: st
                     <SubmitButton>Salvar</SubmitButton>
                   </form>
                 ) : (
-                  <span className="rounded-md bg-zinc-100 px-2 py-1 text-xs uppercase text-zinc-600">{memberRoleLabel(member.role)}</span>
+                  <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold uppercase text-slate-700">{memberRoleLabel(member.role)}</span>
                 )}
               </div>
             ))}
