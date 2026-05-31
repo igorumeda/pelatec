@@ -45,6 +45,17 @@ export function memberRoleLabel(value: string | null | undefined) {
   }
 }
 
+export function memberTypeLabel(value: string | null | undefined) {
+  switch (value) {
+    case "monthly":
+      return "Mensalista";
+    case "daily":
+      return "Diarista";
+    default:
+      return value ?? "-";
+  }
+}
+
 export function roundStatusLabel(value: string | null | undefined) {
   switch (value) {
     case "scheduled":

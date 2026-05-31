@@ -5,7 +5,7 @@ import { BackLink, Card, CardTitle, Field, PageHeader } from "@/components/ui";
 import { SubmitButton } from "@/components/submit-button";
 import { canManage, getMyRole, requireUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
-import { memberRoleLabel } from "@/lib/utils";
+import { memberRoleLabel, memberTypeLabel } from "@/lib/utils";
 
 export default async function MembersPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -14,7 +14,7 @@ export default async function MembersPage({ params }: { params: Promise<{ id: st
   const supabase = await createClient();
   const { data: members } = await supabase
     .from("pelada_members")
-    .select("user_id, role, profiles(id, name, email, phone)")
+    .select("user_id, role, member_type, profiles(id, name, email, phone)")
     .eq("pelada_id", id)
     .order("created_at");
 
@@ -23,7 +23,7 @@ export default async function MembersPage({ params }: { params: Promise<{ id: st
       <div className="mb-4">
         <BackLink href={`/peladas/${id}`}>Voltar para a pelada</BackLink>
       </div>
-      <PageHeader title="Membros" description="Gerencie jogadores e administradores da pelada." theme="dark" />
+      <PageHeader title="Membros" description="Gerencie permissões e tipos de membro da pelada." theme="dark" />
       <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
         <Card>
           <CardTitle icon={UsersRound}>Lista de membros</CardTitle>
@@ -38,14 +38,21 @@ export default async function MembersPage({ params }: { params: Promise<{ id: st
                   <form action={updateMemberRoleFormAction} className="flex gap-2">
                     <input type="hidden" name="pelada_id" value={id} />
                     <input type="hidden" name="user_id" value={member.user_id} />
-                    <select name="role" defaultValue={member.role} className="w-32">
-                      <option value="player">Jogador</option>
+                    <select name="role" defaultValue={member.role} className="w-36">
+                      <option value="player">Membro comum</option>
                       <option value="admin">Administrador</option>
+                    </select>
+                    <select name="member_type" defaultValue={member.member_type ?? "monthly"} className="w-36">
+                      <option value="monthly">Mensalista</option>
+                      <option value="daily">Diarista</option>
                     </select>
                     <SubmitButton>Salvar</SubmitButton>
                   </form>
                 ) : (
-                  <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold uppercase text-slate-700">{memberRoleLabel(member.role)}</span>
+                  <div className="flex flex-wrap gap-2">
+                    <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold uppercase text-slate-700">{memberRoleLabel(member.role)}</span>
+                    <span className="rounded-full bg-field-50 px-2.5 py-1 text-xs font-semibold uppercase text-field-700">{memberTypeLabel(member.member_type)}</span>
+                  </div>
                 )}
               </div>
             ))}
@@ -60,10 +67,16 @@ export default async function MembersPage({ params }: { params: Promise<{ id: st
               <Field label="E-mail do usuario">
                 <input name="email" type="email" required />
               </Field>
-              <Field label="Papel">
+              <Field label="Permissão">
                 <select name="role" defaultValue="player">
-                  <option value="player">Jogador</option>
+                  <option value="player">Membro comum</option>
                   <option value="admin">Administrador</option>
+                </select>
+              </Field>
+              <Field label="Tipo de membro">
+                <select name="member_type" defaultValue="monthly">
+                  <option value="monthly">Mensalista</option>
+                  <option value="daily">Diarista</option>
                 </select>
               </Field>
             </ActionStateForm>

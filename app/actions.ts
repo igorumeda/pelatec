@@ -180,7 +180,7 @@ export async function createPeladaAction(_: unknown, formData: FormData) {
     if (error) throw error;
     const { error: memberError } = await supabase
       .from("pelada_members")
-      .insert({ pelada_id: peladaId, user_id: user.id, role: "owner" });
+      .insert({ pelada_id: peladaId, user_id: user.id, role: "owner", member_type: "monthly" });
     if (memberError) throw memberError;
   } catch (error) {
     return actionError(error);
@@ -214,7 +214,7 @@ export async function addMemberAction(_: unknown, formData: FormData) {
     if (!profileId) throw new Error("Usuário não encontrado. Ele precisa criar conta primeiro.");
     const { error } = await supabase
       .from("pelada_members")
-      .upsert({ pelada_id: input.pelada_id, user_id: profileId, role: input.role });
+      .upsert({ pelada_id: input.pelada_id, user_id: profileId, role: input.role, member_type: input.member_type });
     if (error) throw error;
     revalidatePath(`/peladas/${input.pelada_id}/membros`);
     return { ok: true, message: "Membro adicionado" };
@@ -230,7 +230,7 @@ export async function updateMemberRoleAction(_: unknown, formData: FormData) {
     const input = memberRoleSchema.parse(values(formData));
     const { error } = await supabase
       .from("pelada_members")
-      .update({ role: input.role })
+      .update({ role: input.role, member_type: input.member_type })
       .eq("pelada_id", input.pelada_id)
       .eq("user_id", input.user_id);
     if (error) throw error;
@@ -467,10 +467,22 @@ export async function createBulkChargesAction(_: unknown, formData: FormData) {
   try {
     const input = bulkChargeSchema.parse(values(formData));
     const userIds = formData.getAll("user_ids").map(String).filter(Boolean);
-    if (!userIds.length) throw new Error("Selecione ao menos um jogador.");
+    if (!userIds.length) throw new Error("Selecione ao menos um mensalista.");
+
+    const { data: allowedMembers, error: membersError } = await supabase
+      .from("pelada_members")
+      .select("user_id")
+      .eq("pelada_id", input.pelada_id)
+      .eq("member_type", "monthly")
+      .in("user_id", userIds);
+
+    if (membersError) throw membersError;
+
+    const allowedUserIds = allowedMembers?.map((member: any) => member.user_id) ?? [];
+    if (!allowedUserIds.length) throw new Error("As cobranças em lote só podem ser geradas para mensalistas.");
 
     const competence = `${input.competence_year}-${input.competence_month}`;
-    const rows = userIds.map((userId) => ({
+    const rows = allowedUserIds.map((userId) => ({
       pelada_id: input.pelada_id,
       user_id: userId,
       description: input.description,

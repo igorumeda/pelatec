@@ -47,13 +47,15 @@ export const peladaSchema = z.object({
 export const memberSchema = z.object({
   pelada_id: z.string().uuid(),
   email: z.string().email("Informe o e-mail do jogador"),
-  role: z.enum(["admin", "player"]).default("player")
+  role: z.enum(["admin", "player"]).default("player"),
+  member_type: z.enum(["monthly", "daily"]).default("monthly")
 });
 
 export const memberRoleSchema = z.object({
   pelada_id: z.string().uuid(),
   user_id: z.string().uuid(),
-  role: z.enum(["admin", "player"])
+  role: z.enum(["admin", "player"]),
+  member_type: z.enum(["monthly", "daily"]).default("monthly")
 });
 
 export const roundSchema = z.object({

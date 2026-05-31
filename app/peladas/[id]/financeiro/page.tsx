@@ -7,7 +7,7 @@ import { FinanceTabs } from "@/components/finance-tabs";
 import { BackLink, Card, CardTitle, Field, PageHeader, Stat } from "@/components/ui";
 import { canManage, getMyRole, requireUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
-import { brl, chargeStatusLabel, competenceLabel, dateLabel } from "@/lib/utils";
+import { brl, chargeStatusLabel, competenceLabel, dateLabel, memberTypeLabel } from "@/lib/utils";
 
 export default async function FinancePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -16,7 +16,11 @@ export default async function FinancePage({ params }: { params: Promise<{ id: st
   if (!canManage(role)) redirect(`/peladas/${id}`);
 
   const supabase = await createClient();
-  const { data: members } = await supabase.from("pelada_members").select("user_id, profiles(name)").eq("pelada_id", id).order("created_at");
+  const { data: members } = await supabase
+    .from("pelada_members")
+    .select("user_id, member_type, profiles(name)")
+    .eq("pelada_id", id)
+    .order("created_at");
   const { data: entries } = await supabase.from("financial_entries").select("*").eq("pelada_id", id).order("entry_date", { ascending: false });
   const { data: charges } = await supabase.from("player_charges").select("*").eq("pelada_id", id).order("created_at", { ascending: false });
   const { data: payments } = await supabase.from("player_payments").select("*").eq("pelada_id", id).order("created_at", { ascending: false });
@@ -28,11 +32,15 @@ export default async function FinancePage({ params }: { params: Promise<{ id: st
   const pendingPayments = (payments ?? []).filter((p: any) => p.status === "pending");
   const totalBalance = entryBalance + paymentTotal;
   const grouped = groupByCompetence(charges ?? [], payments ?? [], entries ?? []);
-  const chargeMembers = (members ?? []).map((member: any) => ({
+  const allMembers = (members ?? []).map((member: any) => ({
     user_id: member.user_id,
+    member_type: member.member_type,
     profiles: Array.isArray(member.profiles) ? member.profiles[0] : member.profiles
   }));
-  const memberName = new Map(chargeMembers.map((member: any) => [member.user_id, member.profiles?.name ?? "Jogador"]));
+  const chargeMembers = allMembers
+    .filter((member: any) => member.member_type === "monthly")
+    .map((member: any) => member);
+  const memberName = new Map(allMembers.map((member: any) => [member.user_id, member.profiles?.name ?? "Jogador"]));
   const chargeById = new Map((charges ?? []).map((charge: any) => [charge.id, charge]));
   const proofLinks = new Map<string, string>();
 
@@ -141,6 +149,9 @@ export default async function FinancePage({ params }: { params: Promise<{ id: st
             <div className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
               <Card>
                 <CardTitle icon={CircleDollarSign}>Nova cobranca em lote</CardTitle>
+                <p className="mt-3 text-sm text-slate-600">
+                  As cobranças em lote são geradas apenas para membros do tipo {memberTypeLabel("monthly").toLowerCase()}.
+                </p>
                 <BulkChargeForm peladaId={id} members={chargeMembers} />
               </Card>
 
