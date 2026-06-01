@@ -1,9 +1,9 @@
 "use client";
 
-import Image from "next/image";
-import { useMemo, useState } from "react";
-import { Camera, ExternalLink, Shield } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { ExternalLink, ImageUp, Shield } from "lucide-react";
 import { Field, LinkButton } from "@/components/ui";
+import { UserAvatar } from "@/components/user-avatar";
 import { type PlayerPosition, type Profile } from "@/lib/types";
 import { cn, playerPositionLabel, totalSkillPoints } from "@/lib/utils";
 
@@ -33,8 +33,13 @@ type SkillKey = (typeof skillConfig)[number]["key"];
 type SkillState = Record<SkillKey, number>;
 
 const positionOptions: PlayerPosition[] = ["striker", "midfielder", "fullback", "center_back", "goalkeeper"];
+const maxAvatarSizeMb = 5;
+const maxAvatarSizeBytes = maxAvatarSizeMb * 1024 * 1024;
 
 export function ProfileEditorFields({ profile }: { profile: Partial<Profile> | null | undefined }) {
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const [avatarName, setAvatarName] = useState<string | null>(null);
+  const [avatarError, setAvatarError] = useState<string | null>(null);
   const [skills, setSkills] = useState<SkillState>({
     shooting: Number(profile?.shooting ?? 0),
     dribbling: Number(profile?.dribbling ?? 0),
@@ -46,6 +51,41 @@ export function ProfileEditorFields({ profile }: { profile: Partial<Profile> | n
 
   const totalPoints = useMemo(() => totalSkillPoints(skills), [skills]);
   const remainingPoints = 10 - totalPoints;
+
+  useEffect(() => {
+    return () => {
+      if (avatarPreview) URL.revokeObjectURL(avatarPreview);
+    };
+  }, [avatarPreview]);
+
+  function handleAvatarChange(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0] ?? null;
+
+    if (avatarPreview) {
+      URL.revokeObjectURL(avatarPreview);
+    }
+
+    setAvatarPreview(null);
+    setAvatarName(null);
+    setAvatarError(null);
+
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      event.target.value = "";
+      setAvatarError("Selecione uma imagem em JPG, PNG ou WebP.");
+      return;
+    }
+
+    if (file.size > maxAvatarSizeBytes) {
+      event.target.value = "";
+      setAvatarError(`A imagem deve ter no maximo ${maxAvatarSizeMb} MB.`);
+      return;
+    }
+
+    setAvatarPreview(URL.createObjectURL(file));
+    setAvatarName(file.name);
+  }
 
   function updateSkill(key: SkillKey, nextValue: number) {
     setSkills((current) => {
@@ -176,22 +216,39 @@ export function ProfileEditorFields({ profile }: { profile: Partial<Profile> | n
           <div className="rounded-3xl border border-panel-200 bg-panel-50/85 p-4">
             <Field label="Foto de perfil">
               <label className="flex min-h-44 cursor-pointer flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-panel-300 bg-white/70 px-4 py-6 text-center text-sm text-slate-600 transition hover:border-brand-700/35 hover:bg-white">
-                {profile?.avatar_url ? (
-                  <Image
-                    src={profile.avatar_url}
-                    alt={`Foto atual de ${profile.name ?? "jogador"}`}
-                    width={80}
-                    height={80}
+                {avatarPreview ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={avatarPreview}
+                    alt="Preview da foto selecionada"
                     className="h-20 w-20 rounded-full border border-panel-200 object-cover shadow-sm"
                   />
                 ) : (
-                  <span className="flex h-20 w-20 items-center justify-center rounded-full bg-brand-950 text-white shadow-sm">
-                    <Camera size={24} />
-                  </span>
+                  <UserAvatar
+                    src={profile?.avatar_url}
+                    name={profile?.name ?? "jogador"}
+                    size={80}
+                    className="h-20 w-20 border border-panel-200 shadow-sm"
+                  />
                 )}
                 <span className="font-semibold text-slate-900">Anexar foto de perfil</span>
-                <span>Imagem JPG, PNG ou WebP. Ao salvar, ela substitui a foto atual.</span>
-                <input name="avatar" type="file" accept="image/png,image/jpeg,image/webp" className="hidden" />
+                <span>
+                  {avatarName
+                    ? `Arquivo selecionado: ${avatarName}`
+                    : `Imagem JPG, PNG ou WebP ate ${maxAvatarSizeMb} MB. Ao salvar, ela substitui a foto atual.`}
+                </span>
+                <span className="inline-flex items-center gap-2 rounded-xl bg-brand-950 px-3 py-2 text-xs font-semibold text-white">
+                  <ImageUp size={15} />
+                  Escolher imagem
+                </span>
+                {avatarError ? <span className="text-sm font-medium text-red-600">{avatarError}</span> : null}
+                <input
+                  name="avatar"
+                  type="file"
+                  accept="image/png,image/jpeg,image/webp"
+                  className="sr-only"
+                  onChange={handleAvatarChange}
+                />
               </label>
             </Field>
             <input type="hidden" name="avatar_url" value={profile?.avatar_url ?? ""} />

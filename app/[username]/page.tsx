@@ -1,8 +1,8 @@
 import Image from "next/image";
-import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, Dumbbell, Gauge, Goal, MoveRight, Shield, Timer, UserRound } from "lucide-react";
+import { Dumbbell, Gauge, Goal, MoveRight, Shield, Timer, UserRound } from "lucide-react";
 import { PlayerSkillRadar } from "@/components/player-skill-radar";
+import { DEFAULT_AVATAR_SRC } from "@/components/user-avatar";
 import { createClient } from "@/lib/supabase/server";
 import { playerPositionLabel } from "@/lib/utils";
 
@@ -46,12 +46,7 @@ export default async function PublicPlayerProfilePage({ params }: { params: Prom
   if (!profile) notFound();
 
   const displayName = profile.nickname?.trim() || profile.name;
-  const initials = displayName
-    .split(" ")
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part[0]?.toUpperCase())
-    .join("");
+  const avatarSrc = profile.avatar_url || DEFAULT_AVATAR_SRC;
 
   const strongestAttribute = [
     ["Chute", profile.shooting],
@@ -64,13 +59,6 @@ export default async function PublicPlayerProfilePage({ params }: { params: Prom
 
   return (
     <div className="mx-auto max-w-6xl">
-      <div className="mb-6">
-        <Link href="/" className="inline-flex items-center gap-2 text-sm font-semibold text-slate-200 hover:text-white">
-          <ArrowLeft size={16} />
-          Voltar ao inicio
-        </Link>
-      </div>
-
       <section className="overflow-hidden rounded-[36px] border border-cyan-300/15 bg-[radial-gradient(circle_at_top_left,_rgba(35,209,170,0.25),_transparent_32%),linear-gradient(145deg,_#171244_0%,_#0e1831_58%,_#08111f_100%)] shadow-2xl">
         <div className="grid gap-8 px-6 py-8 lg:grid-cols-[1.15fr,0.85fr] lg:px-8">
           <div className="space-y-6">
@@ -137,13 +125,8 @@ export default async function PublicPlayerProfilePage({ params }: { params: Prom
             </div>
           </div>
 
-          <div className="relative flex min-h-[560px] items-end justify-center rounded-[30px] border border-cyan-300/12 bg-[linear-gradient(180deg,_rgba(23,139,255,0.12),_rgba(11,17,31,0.08)),radial-gradient(circle_at_top,_rgba(110,231,255,0.18),_transparent_45%)] px-6 pt-10">
-            <div className="absolute inset-x-8 top-8 h-48 rounded-full bg-cyan-300/10 blur-3xl" />
-            <div className="absolute left-6 top-6 rounded-2xl border border-white/10 bg-white/8 px-4 py-3">
-              <p className="text-[11px] uppercase tracking-[0.26em] text-cyan-200/80">Estilo</p>
-              <p className="mt-1 text-lg font-bold text-white">{profile.play_style || "Jogador de area"}</p>
-            </div>
-            <div className="absolute bottom-8 left-6 right-6 rounded-[24px] border border-white/10 bg-[#091120]/65 p-4 backdrop-blur">
+          <div className="grid gap-4">
+            <div className="rounded-[24px] border border-white/10 bg-[#091120]/65 p-4 backdrop-blur">
               <div className="mb-3 flex items-center gap-2">
                 <Shield size={16} className="text-cyan-100" />
                 <p className="text-sm font-semibold text-white">Resumo tecnico</p>
@@ -161,26 +144,41 @@ export default async function PublicPlayerProfilePage({ params }: { params: Prom
                 </div>
               </div>
             </div>
-            {profile.avatar_url ? (
-              <Image
-                src={profile.avatar_url}
-                alt={`Foto de ${displayName}`}
-                width={720}
-                height={1040}
-                sizes="(max-width: 1024px) 100vw, 360px"
-                className="relative z-10 max-h-[520px] w-full max-w-[360px] rounded-[28px] object-cover object-top shadow-2xl"
-              />
-            ) : (
-              <div className="relative z-10 flex h-[440px] w-full max-w-[320px] items-center justify-center rounded-[32px] border border-white/10 bg-white/8 shadow-2xl">
-                <div className="text-center">
-                  <span className="mx-auto flex h-28 w-28 items-center justify-center rounded-full border border-cyan-300/20 bg-cyan-300/10 text-4xl font-black text-white">
-                    {initials || "P"}
-                  </span>
-                  <p className="mt-5 text-lg font-semibold text-white">{displayName}</p>
-                  <p className="mt-1 text-sm text-slate-300">@{profile.username}</p>
+
+            <div className="relative overflow-hidden rounded-[30px] border border-cyan-300/12 bg-[linear-gradient(180deg,_rgba(23,139,255,0.12),_rgba(11,17,31,0.08)),radial-gradient(circle_at_top,_rgba(110,231,255,0.18),_transparent_45%)] px-6 pt-10">
+              <div className="absolute inset-x-8 top-8 h-48 rounded-full bg-cyan-300/10 blur-3xl" />
+              <div className="absolute left-6 top-6 z-20 rounded-2xl border border-white/10 bg-white/8 px-4 py-3">
+              <p className="text-[11px] uppercase tracking-[0.26em] text-cyan-200/80">Estilo</p>
+              <p className="mt-1 text-lg font-bold text-white">{profile.play_style || "Jogador de area"}</p>
+              </div>
+              <div className="relative z-10 flex min-h-[560px] items-end justify-center pt-20">
+                <div className="relative w-full max-w-[360px] overflow-hidden rounded-[28px] shadow-2xl">
+                  <Image
+                    src={avatarSrc}
+                    alt={`Foto de ${displayName}`}
+                    width={720}
+                    height={1040}
+                    sizes="(max-width: 1024px) 100vw, 360px"
+                    unoptimized={!profile.avatar_url}
+                    className="h-auto w-full object-cover object-top"
+                  />
                 </div>
               </div>
-            )}
+              <div className="relative z-10 mt-4 pb-6">
+                <div className="rounded-[24px] border border-white/10 bg-[#091120]/65 p-4 backdrop-blur">
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    <div className="rounded-2xl bg-white/6 p-3">
+                      <p className="text-xs uppercase tracking-[0.18em] text-slate-300">Nome em campo</p>
+                      <p className="mt-1 text-base font-semibold text-white">{displayName}</p>
+                    </div>
+                    <div className="rounded-2xl bg-white/6 p-3">
+                      <p className="text-xs uppercase tracking-[0.18em] text-slate-300">Usuario</p>
+                      <p className="mt-1 text-base font-semibold text-white">@{profile.username}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>

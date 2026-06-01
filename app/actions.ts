@@ -167,12 +167,19 @@ export async function updateProfileAction(_: unknown, formData: FormData) {
     const avatar = formData.get("avatar");
 
     if (avatar instanceof File && avatar.size > 0) {
+      if (!avatar.type.startsWith("image/")) {
+        throw new Error("Selecione uma imagem valida para a foto de perfil.");
+      }
+      if (avatar.size > 5 * 1024 * 1024) {
+        throw new Error("A foto de perfil deve ter no maximo 5 MB.");
+      }
       const safeName = avatar.name.replace(/[^a-zA-Z0-9._-]/g, "-");
       const path = `${user.id}/avatar-${Date.now()}-${safeName}`;
       const { error: uploadError } = await supabase.storage.from("profile-avatars").upload(path, avatar, {
+        contentType: avatar.type || undefined,
         upsert: true
       });
-      if (uploadError) throw uploadError;
+      if (uploadError) throw new Error(`Nao foi possivel enviar a foto: ${uploadError.message}`);
       const { data: publicAvatar } = supabase.storage.from("profile-avatars").getPublicUrl(path);
       avatarUrl = publicAvatar.publicUrl;
     }

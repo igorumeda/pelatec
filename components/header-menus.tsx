@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useRef, useState } from "react";
-import { Bell, LayoutDashboard, LogOut, ShieldCheck, UserRound, Users } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Bell, LayoutDashboard, LogOut, ShieldCheck, Users } from "lucide-react";
 import { signOutAction } from "@/app/actions";
+import { UserAvatar } from "@/components/user-avatar";
 import { cn } from "@/lib/utils";
 
 type NotificationItem = {
@@ -100,10 +101,6 @@ export function NotificationsMenu({ items }: { items: NotificationItem[] }) {
 export function UserMenu({ profile }: UserMenuProps) {
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
-  const initials = useMemo(() => {
-    const parts = profile.name.trim().split(/\s+/).slice(0, 2);
-    return parts.map((part) => part[0]?.toUpperCase() ?? "").join("") || "U";
-  }, [profile.name]);
 
   useEffect(() => {
     function handleOutsideClick(event: MouseEvent) {
@@ -124,26 +121,19 @@ export function UserMenu({ profile }: UserMenuProps) {
         aria-label="Menu do usuário"
         onClick={() => setOpen((value) => !value)}
       >
-        {profile.avatar_url ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={profile.avatar_url} alt={profile.name} className="h-8 w-8 rounded-full object-cover" />
-        ) : (
-          <UserRound size={20} />
-        )}
+        <UserAvatar src={profile.avatar_url} name={profile.name} size={32} className="h-8 w-8" />
       </button>
 
       {open ? (
         <div className="absolute right-0 top-14 z-30 w-80 overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-panel">
           <div className="bg-brand-950 px-4 py-4 text-white">
             <div className="flex items-center gap-3">
-              {profile.avatar_url ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={profile.avatar_url} alt={profile.name} className="h-11 w-11 rounded-full border border-white/15 object-cover" />
-              ) : (
-                <span className="flex h-11 w-11 items-center justify-center rounded-full bg-field-500 text-sm font-bold text-white">
-                  {initials}
-                </span>
-              )}
+              <UserAvatar
+                src={profile.avatar_url}
+                name={profile.name}
+                size={44}
+                className="h-11 w-11 border border-white/15"
+              />
               <div className="min-w-0">
                 <p className="truncate text-sm font-semibold">{profile.name}</p>
                 <p className="truncate text-xs text-slate-200">{profile.email}</p>
