@@ -2,6 +2,19 @@ import { z } from "zod";
 
 const money = z.coerce.number().min(0).optional().or(z.literal("").transform(() => undefined));
 const optionalText = z.string().trim().optional().transform((v) => v || undefined);
+const reservedUsernames = new Set([
+  "login",
+  "signup",
+  "dashboard",
+  "peladas",
+  "perfil",
+  "rodadas",
+  "auth",
+  "api",
+  "criar-senha",
+  "atualizar-senha",
+  "recuperar-senha"
+]);
 
 export const loginSchema = z.object({
   email: z.string().email("E-mail inválido"),
@@ -27,8 +40,31 @@ export const passwordUpdateSchema = z.object({
 
 export const profileSchema = z.object({
   name: z.string().trim().min(2, "Informe seu nome"),
+  username: z.string().trim().toLowerCase()
+    .regex(/^[a-z0-9_]{3,20}$/, "Use 3 a 20 caracteres minúsculos, números ou underscore")
+    .refine((value) => !reservedUsernames.has(value), "Esse nome de usuário não está disponível"),
+  nickname: optionalText,
   phone: optionalText,
-  avatar_url: optionalText
+  avatar_url: optionalText,
+  age: z.coerce.number().int().min(10).max(99).optional().or(z.literal("").transform(() => undefined)),
+  position: z.enum(["striker", "midfielder", "fullback", "center_back", "goalkeeper"]).optional().or(z.literal("").transform(() => undefined)),
+  height_cm: z.coerce.number().int().min(120).max(240).optional().or(z.literal("").transform(() => undefined)),
+  weight_kg: z.coerce.number().int().min(35).max(200).optional().or(z.literal("").transform(() => undefined)),
+  play_style: optionalText,
+  shooting: z.coerce.number().int().min(0).max(10),
+  dribbling: z.coerce.number().int().min(0).max(10),
+  passing: z.coerce.number().int().min(0).max(10),
+  strength: z.coerce.number().int().min(0).max(10),
+  speed: z.coerce.number().int().min(0).max(10),
+  defense: z.coerce.number().int().min(0).max(10)
+}).superRefine((value, ctx) => {
+  const total = value.shooting + value.dribbling + value.passing + value.strength + value.speed + value.defense;
+  if (total > 10) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "Você pode distribuir no máximo 10 pontos entre as habilidades."
+    });
+  }
 });
 
 export const peladaSchema = z.object({

@@ -43,6 +43,14 @@ function actionError(error: unknown) {
   if (error instanceof z.ZodError) {
     return { ok: false, message: error.issues[0]?.message ?? "Dados inválidos" };
   }
+  if (
+    typeof error === "object" &&
+    error !== null &&
+    "code" in error &&
+    String((error as { code?: string }).code) === "23505"
+  ) {
+    return { ok: false, message: "Esse nome de usuário já está em uso. Tente outro." };
+  }
   if (error instanceof Error) return { ok: false, message: error.message };
   if (typeof error === "object" && error !== null && "message" in error) {
     return { ok: false, message: String(error.message) };
@@ -149,10 +157,34 @@ export async function updateProfileAction(_: unknown, formData: FormData) {
   const user = await requireUser();
   const supabase = await createClient();
   try {
+    const { data: currentProfile } = await supabase
+      .from("profiles")
+      .select("username")
+      .eq("id", user.id)
+      .maybeSingle();
     const input = profileSchema.parse(values(formData));
-    const { error } = await supabase.from("profiles").update(input).eq("id", user.id);
+    let avatarUrl = input.avatar_url;
+    const avatar = formData.get("avatar");
+
+    if (avatar instanceof File && avatar.size > 0) {
+      const safeName = avatar.name.replace(/[^a-zA-Z0-9._-]/g, "-");
+      const path = `${user.id}/avatar-${Date.now()}-${safeName}`;
+      const { error: uploadError } = await supabase.storage.from("profile-avatars").upload(path, avatar, {
+        upsert: true
+      });
+      if (uploadError) throw uploadError;
+      const { data: publicAvatar } = supabase.storage.from("profile-avatars").getPublicUrl(path);
+      avatarUrl = publicAvatar.publicUrl;
+    }
+
+    const { error } = await supabase.from("profiles").update({ ...input, avatar_url: avatarUrl }).eq("id", user.id);
     if (error) throw error;
     revalidatePath("/perfil");
+    if (currentProfile?.username && currentProfile.username !== input.username) {
+      revalidatePath(`/${currentProfile.username}`);
+    }
+    revalidatePath(`/${input.username}`);
+    revalidateAppShell();
     return { ok: true, message: "Perfil atualizado" };
   } catch (error) {
     return actionError(error);

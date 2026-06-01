@@ -1,6 +1,33 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 
+const reservedUsernames = new Set([
+  "login",
+  "signup",
+  "dashboard",
+  "peladas",
+  "perfil",
+  "rodadas",
+  "auth",
+  "api",
+  "criar_senha",
+  "atualizar_senha",
+  "recuperar_senha"
+]);
+
+function usernameFromText(value: string) {
+  const normalized = value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9_]+/g, "_")
+    .replace(/^_+|_+$/g, "")
+    .slice(0, 20);
+
+  if (normalized.length < 3 || reservedUsernames.has(normalized)) return null;
+  return normalized;
+}
+
 export async function GET(request: NextRequest) {
   const url = new URL(request.url);
   const code = url.searchParams.get("code");
@@ -23,7 +50,8 @@ export async function GET(request: NextRequest) {
       await supabase.from("profiles").upsert({
         id: user.id,
         name: fallbackName,
-        email: user.email ?? ""
+        email: user.email ?? "",
+        username: usernameFromText(user.email?.split("@")[0] ?? fallbackName)
       });
     }
   }

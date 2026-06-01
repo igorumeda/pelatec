@@ -56,6 +56,39 @@ export function memberTypeLabel(value: string | null | undefined) {
   }
 }
 
+export function playerPositionLabel(value: string | null | undefined) {
+  switch (value) {
+    case "striker":
+      return "Atacante";
+    case "midfielder":
+      return "Meia";
+    case "fullback":
+      return "Lateral";
+    case "center_back":
+      return "Zagueiro";
+    case "goalkeeper":
+      return "Goleiro";
+    default:
+      return value ?? "-";
+  }
+}
+
+export function totalSkillPoints(skills: {
+  shooting?: number | null;
+  dribbling?: number | null;
+  passing?: number | null;
+  strength?: number | null;
+  speed?: number | null;
+  defense?: number | null;
+}) {
+  return Number(skills.shooting ?? 0) +
+    Number(skills.dribbling ?? 0) +
+    Number(skills.passing ?? 0) +
+    Number(skills.strength ?? 0) +
+    Number(skills.speed ?? 0) +
+    Number(skills.defense ?? 0);
+}
+
 export function roundStatusLabel(value: string | null | undefined) {
   switch (value) {
     case "scheduled":

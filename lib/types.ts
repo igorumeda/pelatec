@@ -1,16 +1,31 @@
 export type MemberRole = "owner" | "admin" | "player";
+export type MemberType = "monthly" | "daily";
 export type PeladaStatus = "active" | "inactive";
 export type RoundStatus = "scheduled" | "finished" | "cancelled";
 export type PresenceStatus = "confirmed" | "declined" | "pending";
 export type FinancialEntryType = "revenue" | "expense";
 export type ChargeStatus = "open" | "paid" | "cancelled";
+export type PlayerPosition = "striker" | "midfielder" | "fullback" | "center_back" | "goalkeeper";
 
 export type Profile = {
   id: string;
   name: string;
   email: string;
+  username: string | null;
+  nickname: string | null;
   phone: string | null;
   avatar_url: string | null;
+  age: number | null;
+  position: PlayerPosition | null;
+  height_cm: number | null;
+  weight_kg: number | null;
+  play_style: string | null;
+  shooting: number;
+  dribbling: number;
+  passing: number;
+  strength: number;
+  speed: number;
+  defense: number;
   created_at: string;
 };
 
@@ -34,6 +49,7 @@ export type PeladaMember = {
   pelada_id: string;
   user_id: string;
   role: MemberRole;
+  member_type?: MemberType;
   profiles?: Profile | null;
 };
 
