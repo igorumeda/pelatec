@@ -159,6 +159,16 @@ export function ProfileEditorFields({ profile }: { profile: Partial<Profile> | n
         </Field>
       </div>
 
+      <Field label="Descricao pessoal do jogador">
+        <textarea
+          name="player_description"
+          rows={5}
+          maxLength={600}
+          defaultValue={profile?.player_description ?? ""}
+          placeholder="Conte, com suas palavras, como voce joga, o que gosta de fazer em campo e que tipo de parceiro de time voce e."
+        />
+      </Field>
+
       <div className="grid gap-5 lg:grid-cols-[1.2fr,0.8fr]">
         <div className="rounded-3xl border border-panel-200 bg-panel-50/85 p-4">
           <div className="flex items-start justify-between gap-4">
@@ -179,7 +189,7 @@ export function ProfileEditorFields({ profile }: { profile: Partial<Profile> | n
           <div className="mt-5 space-y-4">
             {skillConfig.map((skill) => {
               const currentValue = skills[skill.key];
-              const maxValue = Math.min(10, currentValue + remainingPoints);
+              const canIncrease = remainingPoints > 0;
               return (
                 <div key={skill.key} className="rounded-2xl border border-panel-200 bg-white/70 p-4">
                   <div className="flex items-center justify-between gap-3">
@@ -193,14 +203,19 @@ export function ProfileEditorFields({ profile }: { profile: Partial<Profile> | n
                       name={skill.key}
                       type="range"
                       min={0}
-                      max={maxValue}
+                      max={10}
                       value={currentValue}
+                      aria-valuetext={
+                        canIncrease || currentValue > 0
+                          ? `${currentValue} de 10`
+                          : "Sem pontos restantes para aumentar"
+                      }
                       onChange={(event) => updateSkill(skill.key, Number(event.target.value))}
                     />
                     <input
                       type="number"
                       min={0}
-                      max={maxValue}
+                      max={10}
                       value={currentValue}
                       onChange={(event) => updateSkill(skill.key, Number(event.target.value))}
                       className="text-center"

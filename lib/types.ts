@@ -20,6 +20,7 @@ export type Profile = {
   height_cm: number | null;
   weight_kg: number | null;
   play_style: string | null;
+  player_description: string | null;
   shooting: number;
   dribbling: number;
   passing: number;
@@ -40,6 +41,10 @@ export type Pelada = {
   default_time: string | null;
   monthly_fee: number | string | null;
   daily_fee: number | string | null;
+  crest_url: string | null;
+  banner_url: string | null;
+  is_public: boolean;
+  public_slug: string | null;
   status: PeladaStatus;
   created_by: string;
   created_at: string;

@@ -6,6 +6,7 @@ import {
   CalendarDays,
   CalendarPlus2,
   CircleDollarSign,
+  ExternalLink,
   MoreHorizontal,
   ReceiptText,
   Settings,
@@ -17,9 +18,10 @@ import {
 type PeladaQuickActionsMenuProps = {
   peladaId: string;
   manageable: boolean;
+  publicHref?: string | null;
 };
 
-export function PeladaQuickActionsMenu({ peladaId, manageable }: PeladaQuickActionsMenuProps) {
+export function PeladaQuickActionsMenu({ peladaId, manageable, publicHref }: PeladaQuickActionsMenuProps) {
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
 
@@ -41,6 +43,7 @@ export function PeladaQuickActionsMenu({ peladaId, manageable }: PeladaQuickActi
     manageable ? { href: `/peladas/${peladaId}/financeiro`, label: "Registrar despesa", icon: Wallet } : null,
     { href: `/peladas/${peladaId}/rodadas`, label: "Ver agenda", icon: CalendarDays },
     { href: `/peladas/${peladaId}/membros`, label: "Ver membros", icon: UsersRound },
+    publicHref ? { href: publicHref, label: "Ver pagina publica", icon: ExternalLink } : null,
     manageable ? { href: `/peladas/${peladaId}/financeiro`, label: "Ver financeiro", icon: ReceiptText } : null,
     manageable ? { href: `/peladas/${peladaId}/editar`, label: "Editar dados", icon: Settings } : null
   ].filter(Boolean) as Array<{ href: string; label: string; icon: typeof CalendarDays }>;

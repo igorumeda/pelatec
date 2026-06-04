@@ -3,7 +3,7 @@ import Link from "next/link";
 import { unstable_noStore as noStore } from "next/cache";
 import { Sparkles } from "lucide-react";
 import { BrandLogo } from "@/components/brand-logo";
-import { NotificationsMenu, UserMenu } from "@/components/header-menus";
+import { UserMenu } from "@/components/header-menus";
 import { getUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import "./globals.css";
@@ -16,7 +16,7 @@ export const metadata: Metadata = {
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   noStore();
   const user = await getUser();
-  let profile: { name: string; email: string; avatar_url?: string | null } | null = null;
+  let profile: { name: string; email: string; avatar_url?: string | null; username?: string | null } | null = null;
   let notifications: Array<{
     id: string;
     title: string;
@@ -28,11 +28,16 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 
   if (user) {
     const supabase = await createClient();
-    const { data: profileRow } = await supabase.from("profiles").select("name, email, avatar_url").eq("id", user.id).maybeSingle();
+    const { data: profileRow } = await supabase
+      .from("profiles")
+      .select("name, email, avatar_url, username")
+      .eq("id", user.id)
+      .maybeSingle();
     profile = {
       name: profileRow?.name ?? user.user_metadata?.name ?? user.email?.split("@")[0] ?? "Usuário",
       email: profileRow?.email ?? user.email ?? "",
-      avatar_url: profileRow?.avatar_url ?? null
+      avatar_url: profileRow?.avatar_url ?? null,
+      username: profileRow?.username ?? null
     };
 
     const { data: memberships } = await supabase
@@ -113,10 +118,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 
             <nav className="flex items-center gap-2">
               {user && profile ? (
-                <>
-                  <NotificationsMenu items={notifications} />
-                  <UserMenu profile={profile} />
-                </>
+                <UserMenu profile={profile} notifications={notifications} />
               ) : (
                 <>
                   <Link className="rounded-xl px-3 py-2 text-sm font-medium text-white hover:bg-white/10 hover:text-white" href="/login">

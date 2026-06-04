@@ -2,6 +2,7 @@ import { z } from "zod";
 
 const money = z.coerce.number().min(0).optional().or(z.literal("").transform(() => undefined));
 const optionalText = z.string().trim().optional().transform((v) => v || undefined);
+const optionalSlug = z.string().trim().toLowerCase().optional().transform((v) => v || undefined);
 const reservedUsernames = new Set([
   "login",
   "signup",
@@ -51,6 +52,7 @@ export const profileSchema = z.object({
   height_cm: z.coerce.number().int().min(120).max(240).optional().or(z.literal("").transform(() => undefined)),
   weight_kg: z.coerce.number().int().min(35).max(200).optional().or(z.literal("").transform(() => undefined)),
   play_style: optionalText,
+  player_description: z.string().trim().max(600, "A descriÃ§Ã£o pode ter no mÃ¡ximo 600 caracteres").optional().transform((v) => v || undefined),
   shooting: z.coerce.number().int().min(0).max(10),
   dribbling: z.coerce.number().int().min(0).max(10),
   passing: z.coerce.number().int().min(0).max(10),
@@ -77,7 +79,21 @@ export const peladaSchema = z.object({
   default_time: optionalText,
   monthly_fee: money,
   daily_fee: money,
+  crest_url: optionalText,
+  banner_url: optionalText,
+  is_public: z.preprocess((value) => value === "on" || value === "true" || value === true, z.boolean()).default(false),
+  public_slug: optionalSlug.pipe(
+    z.string().regex(/^[a-z0-9-]{3,40}$/, "Use 3 a 40 caracteres minusculos, numeros ou hifen").optional()
+  ),
   status: z.enum(["active", "inactive"]).default("active")
+}).superRefine((value, ctx) => {
+  if (value.is_public && !value.public_slug) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["public_slug"],
+      message: "Informe a URL publica da pelada."
+    });
+  }
 });
 
 export const memberSchema = z.object({

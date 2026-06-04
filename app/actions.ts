@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { createClient as createSupabaseJsClient } from "@supabase/supabase-js";
 import { z } from "zod";
 import { requireUser } from "@/lib/auth";
 import {
@@ -49,6 +50,10 @@ function actionError(error: unknown) {
     "code" in error &&
     String((error as { code?: string }).code) === "23505"
   ) {
+    const message = "message" in error ? String((error as { message?: string }).message) : "";
+    if (message.includes("peladas_public_slug")) {
+      return { ok: false, message: "Essa URL publica da pelada ja esta em uso. Tente outra." };
+    }
     return { ok: false, message: "Esse nome de usuário já está em uso. Tente outro." };
   }
   if (error instanceof Error) return { ok: false, message: error.message };
@@ -56,6 +61,74 @@ function actionError(error: unknown) {
     return { ok: false, message: String(error.message) };
   }
   return { ok: false, message: "Não foi possível concluir a operação" };
+}
+
+async function getAuthenticatedStorageClient(supabase: Awaited<ReturnType<typeof createClient>>) {
+  const {
+    data: { session }
+  } = await supabase.auth.getSession();
+
+  if (!session?.access_token) {
+    throw new Error("Sua sessao expirou. Entre novamente para enviar imagens.");
+  }
+
+  return createSupabaseJsClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false
+      },
+      global: {
+        headers: {
+          Authorization: `Bearer ${session.access_token}`
+        }
+      }
+    }
+  );
+}
+
+async function uploadImageFromForm({
+  supabase,
+  formData,
+  field,
+  bucket,
+  pathPrefix,
+  currentUrl,
+  label
+}: {
+  supabase: Awaited<ReturnType<typeof createClient>>;
+  formData: FormData;
+  field: string;
+  bucket: string;
+  pathPrefix: string;
+  currentUrl?: string;
+  label: string;
+}) {
+  const image = formData.get(field);
+  if (!(image instanceof File) || image.size === 0) return currentUrl;
+
+  if (!image.type.startsWith("image/")) {
+    throw new Error(`Selecione uma imagem valida para ${label}.`);
+  }
+
+  if (image.size > 5 * 1024 * 1024) {
+    throw new Error(`A imagem de ${label} deve ter no maximo 5 MB.`);
+  }
+
+  const storageClient = await getAuthenticatedStorageClient(supabase);
+  const safeName = image.name.replace(/[^a-zA-Z0-9._-]/g, "-");
+  const path = `${pathPrefix}/${field}-${Date.now()}-${safeName}`;
+  const { error: uploadError } = await storageClient.storage.from(bucket).upload(path, image, {
+    contentType: image.type || undefined,
+    upsert: false
+  });
+
+  if (uploadError) throw new Error(`Nao foi possivel enviar ${label}: ${uploadError.message}`);
+
+  const { data } = storageClient.storage.from(bucket).getPublicUrl(path);
+  return data.publicUrl;
 }
 
 export async function signUpAction(_: unknown, formData: FormData) {
@@ -173,14 +246,35 @@ export async function updateProfileAction(_: unknown, formData: FormData) {
       if (avatar.size > 5 * 1024 * 1024) {
         throw new Error("A foto de perfil deve ter no maximo 5 MB.");
       }
+      const {
+        data: { session }
+      } = await supabase.auth.getSession();
+      if (!session?.access_token) {
+        throw new Error("Sua sessao expirou. Entre novamente para enviar a foto.");
+      }
+      const storageClient = createSupabaseJsClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+        {
+          auth: {
+            autoRefreshToken: false,
+            persistSession: false
+          },
+          global: {
+            headers: {
+              Authorization: `Bearer ${session.access_token}`
+            }
+          }
+        }
+      );
       const safeName = avatar.name.replace(/[^a-zA-Z0-9._-]/g, "-");
       const path = `${user.id}/avatar-${Date.now()}-${safeName}`;
-      const { error: uploadError } = await supabase.storage.from("profile-avatars").upload(path, avatar, {
+      const { error: uploadError } = await storageClient.storage.from("profile-avatars").upload(path, avatar, {
         contentType: avatar.type || undefined,
-        upsert: true
+        upsert: false
       });
       if (uploadError) throw new Error(`Nao foi possivel enviar a foto: ${uploadError.message}`);
-      const { data: publicAvatar } = supabase.storage.from("profile-avatars").getPublicUrl(path);
+      const { data: publicAvatar } = storageClient.storage.from("profile-avatars").getPublicUrl(path);
       avatarUrl = publicAvatar.publicUrl;
     }
 
@@ -204,6 +298,30 @@ export async function createPeladaAction(_: unknown, formData: FormData) {
   const peladaId = crypto.randomUUID();
   try {
     const input = peladaSchema.parse(values(formData));
+    const crestUrl = await uploadImageFromForm({
+      supabase,
+      formData,
+      field: "crest",
+      bucket: "pelada-assets",
+      pathPrefix: `${user.id}/${peladaId}`,
+      currentUrl: input.crest_url,
+      label: "o brasao"
+    });
+    const bannerUrl = await uploadImageFromForm({
+      supabase,
+      formData,
+      field: "banner",
+      bucket: "pelada-assets",
+      pathPrefix: `${user.id}/${peladaId}`,
+      currentUrl: input.banner_url,
+      label: "o banner"
+    });
+    const payload = {
+      ...input,
+      crest_url: crestUrl,
+      banner_url: bannerUrl,
+      public_slug: input.public_slug ?? null
+    };
     const { error: profileError } = await supabase
       .from("profiles")
       .upsert({
@@ -215,7 +333,7 @@ export async function createPeladaAction(_: unknown, formData: FormData) {
 
     const { error } = await supabase
       .from("peladas")
-      .insert({ id: peladaId, ...input, created_by: user.id });
+      .insert({ id: peladaId, ...payload, created_by: user.id });
     if (error) throw error;
     const { error: memberError } = await supabase
       .from("pelada_members")
@@ -231,10 +349,41 @@ export async function updatePeladaAction(id: string, _: unknown, formData: FormD
   await requireUser();
   const supabase = await createClient();
   try {
+    const { data: currentPelada } = await supabase
+      .from("peladas")
+      .select("crest_url, banner_url, public_slug")
+      .eq("id", id)
+      .maybeSingle();
     const input = peladaSchema.parse(values(formData));
-    const { error } = await supabase.from("peladas").update(input).eq("id", id);
+    const crestUrl = await uploadImageFromForm({
+      supabase,
+      formData,
+      field: "crest",
+      bucket: "pelada-assets",
+      pathPrefix: `peladas/${id}`,
+      currentUrl: input.crest_url ?? currentPelada?.crest_url ?? undefined,
+      label: "o brasao"
+    });
+    const bannerUrl = await uploadImageFromForm({
+      supabase,
+      formData,
+      field: "banner",
+      bucket: "pelada-assets",
+      pathPrefix: `peladas/${id}`,
+      currentUrl: input.banner_url ?? currentPelada?.banner_url ?? undefined,
+      label: "o banner"
+    });
+    const payload = {
+      ...input,
+      crest_url: crestUrl,
+      banner_url: bannerUrl,
+      public_slug: input.public_slug ?? null
+    };
+    const { error } = await supabase.from("peladas").update(payload).eq("id", id);
     if (error) throw error;
     revalidatePath(`/peladas/${id}`);
+    if (currentPelada?.public_slug) revalidatePath(`/pelada/${currentPelada.public_slug}`);
+    if (input.public_slug) revalidatePath(`/pelada/${input.public_slug}`);
     return { ok: true, message: "Pelada atualizada" };
   } catch (error) {
     return actionError(error);

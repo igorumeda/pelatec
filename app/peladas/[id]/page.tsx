@@ -146,6 +146,7 @@ export default async function PeladaDetailsPage({ params }: { params: Promise<{ 
     pelada?.default_time ? { icon: Clock3, label: `Horário padrão ${pelada.default_time.slice(0, 5)}` } : null,
     pelada?.status ? { icon: CircleDollarSign, label: `Status ${peladaStatusLabel(pelada.status)}` } : null
   ].filter(Boolean) as { icon: typeof MapPin; label: string }[];
+  const publicPeladaHref = pelada?.is_public && pelada?.public_slug ? `/pelada/${pelada.public_slug}` : null;
 
   return (
     <>
@@ -158,7 +159,7 @@ export default async function PeladaDetailsPage({ params }: { params: Promise<{ 
           title={pelada?.name ?? "Pelada"}
           description={pelada?.description ?? "Painel operacional da pelada."}
           theme="dark"
-          action={<PeladaQuickActionsMenu peladaId={id} manageable={manageable} />}
+          action={<PeladaQuickActionsMenu peladaId={id} manageable={manageable} publicHref={publicPeladaHref} />}
         />
 
         {topMeta.length ? (
