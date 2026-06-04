@@ -26,12 +26,9 @@ function pointFor(angleDeg: number, radius: number, center = 110) {
   };
 }
 
-export function overallFromSkills(values: SkillShape) {
-  return 70 + Math.round((Math.min(10, totalSkillPoints(values)) / 10) * 20);
-}
-
 export function PlayerSkillRadar({ values }: { values: SkillShape }) {
   const maxRadius = 78;
+  const totalPoints = totalSkillPoints(values);
   const polygon = skills
     .map((skill) => {
       const level = Number(values[skill.key] ?? 0);
@@ -44,13 +41,9 @@ export function PlayerSkillRadar({ values }: { values: SkillShape }) {
     <div className="rounded-[28px] border border-white/10 bg-[#13103a]/85 p-5 text-white shadow-2xl">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <p className="text-[11px] uppercase tracking-[0.26em] text-cyan-200/80">Skills</p>
-          <p className="mt-2 text-5xl font-extrabold leading-none text-white">{overallFromSkills(values)}</p>
-          <p className="mt-2 text-sm text-slate-300">Overall calculado pelas habilidades distribuidas.</p>
-        </div>
-        <div className="rounded-2xl border border-cyan-400/20 bg-cyan-300/10 px-3 py-2 text-right">
-          <p className="text-[11px] uppercase tracking-[0.24em] text-cyan-200/80">Pontos usados</p>
-          <p className="text-2xl font-bold text-cyan-100">{totalSkillPoints(values)}/10</p>
+          <p className="text-[11px] uppercase tracking-[0.26em] text-cyan-200/80">Pontuacao geral</p>
+          <p className="mt-2 text-5xl font-extrabold leading-none text-white">{totalPoints}</p>
+          <p className="mt-2 text-sm text-slate-300">Soma dos pontos distribuidos nas habilidades.</p>
         </div>
       </div>
 

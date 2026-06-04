@@ -46,11 +46,16 @@ export function UserMenu({ profile, notifications }: UserMenuProps) {
     <div ref={rootRef} className="relative">
       <button
         type="button"
-        className="relative rounded-xl border border-white/15 bg-white/10 p-2.5 text-white hover:bg-white/15 hover:text-white"
+        className="relative inline-flex h-11 w-11 items-center justify-center rounded-full text-white transition hover:opacity-90"
         aria-label="Menu do usuario"
         onClick={() => setOpen((value) => !value)}
       >
-        <UserAvatar src={profile.avatar_url} name={profile.name} size={32} className="h-8 w-8" />
+        <UserAvatar
+          src={profile.avatar_url}
+          name={profile.name}
+          size={44}
+          className="h-11 w-11 border-2 border-white/35 shadow-sm"
+        />
         {notifications.length ? (
           <span className="absolute -right-1 -top-1 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-accent-400 px-1 text-[10px] font-bold text-brand-950">
             {notifications.length > 9 ? "9+" : notifications.length}
