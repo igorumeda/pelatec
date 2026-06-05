@@ -89,7 +89,7 @@ export function MyPresenceCard() {
 
   return (
     <Card>
-      <h2 className="font-semibold text-slate-900">Minha presenca</h2>
+      <h2 className="font-semibold text-slate-900">Minha presença</h2>
       <div className="mt-4 flex flex-wrap gap-2">
         {(Object.keys(labels) as PresenceStatus[]).map((status) => {
           const Icon = icons[status];
@@ -125,7 +125,7 @@ export function PresenceListCard({ canManage }: { canManage: boolean }) {
 
   return (
     <Card>
-      <h2 className="font-semibold text-slate-900">Presencas</h2>
+      <h2 className="font-semibold text-slate-900">Presenças</h2>
       <div className="mt-4 space-y-3">
         {context.members.map((member) => (
           <PresenceRow key={member.user_id} member={member} canManage={canManage} />

@@ -9,7 +9,7 @@ export default function CreatePasswordPage() {
       <div className="mb-4">
         <BackLink href="/login">Voltar para entrar</BackLink>
       </div>
-      <PageHeader title="Criar senha" description="Sua conta ja foi confirmada. Agora escolha uma senha para entrar com e-mail e senha." theme="dark" />
+      <PageHeader title="Criar senha" description="Sua conta já foi confirmada. Agora escolha uma senha para entrar com e-mail e senha." theme="dark" />
       <Card>
         <CardTitle icon={KeyRound}>Definir senha</CardTitle>
         <ActionStateForm action={updatePasswordAction} submitLabel="Salvar senha">

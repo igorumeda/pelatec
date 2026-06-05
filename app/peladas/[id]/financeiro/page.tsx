@@ -60,23 +60,23 @@ export default async function FinancePage({ params }: { params: Promise<{ id: st
       <div className="mb-4">
         <BackLink href={`/peladas/${id}`}>Voltar para a pelada</BackLink>
       </div>
-      <PageHeader title="Financeiro" description="Cobrancas, pagamentos, despesas e saldo por competencia." theme="dark" />
+      <PageHeader title="Financeiro" description="Cobranças, pagamentos, despesas e saldo por competência." theme="dark" />
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
-        <Stat label="Saldo de lancamentos" value={brl(entryBalance)} />
+        <Stat label="Saldo de lançamentos" value={brl(entryBalance)} />
         <Stat label="Pagamentos aprovados" value={brl(paymentTotal)} />
         <Stat label="Saldo geral" value={brl(totalBalance)} />
-        <Stat label="Cobrancas abertas" value={brl(chargeOpen)} />
+        <Stat label="Cobranças abertas" value={brl(chargeOpen)} />
         <Stat label="Pagamentos pendentes" value={pendingPayments.length} />
       </div>
 
       <Card className="mt-6">
-        <CardTitle icon={ReceiptText}>Relatorio por competencia</CardTitle>
+        <CardTitle icon={ReceiptText}>Relatório por competência</CardTitle>
         <div className="mt-4 overflow-x-auto">
           <table className="min-w-full border-separate border-spacing-0 overflow-hidden rounded-2xl border border-slate-200 text-sm">
             <thead className="bg-slate-50 text-left text-slate-700">
               <tr>
-                <th className="border-b border-slate-200 px-4 py-3 font-semibold">Competencia</th>
+                <th className="border-b border-slate-200 px-4 py-3 font-semibold">Competência</th>
                 <th className="border-b border-slate-200 px-4 py-3 font-semibold">Cobrado</th>
                 <th className="border-b border-slate-200 px-4 py-3 font-semibold">Pago</th>
                 <th className="border-b border-slate-200 px-4 py-3 font-semibold">Despesas</th>
@@ -93,7 +93,7 @@ export default async function FinancePage({ params }: { params: Promise<{ id: st
               ))}
               {!Object.keys(grouped).length ? (
                 <tr>
-                  <td colSpan={4} className="px-4 py-6 text-center text-slate-500">Nenhum dado agrupado por competencia ainda.</td>
+                  <td colSpan={4} className="px-4 py-6 text-center text-slate-500">Nenhum dado agrupado por competência ainda.</td>
                 </tr>
               ) : null}
             </tbody>
@@ -107,18 +107,18 @@ export default async function FinancePage({ params }: { params: Promise<{ id: st
             <div className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
               <Card>
                 <CardTitle icon={Landmark}>Receita ou despesa</CardTitle>
-                <ActionStateForm action={createFinancialEntryAction} submitLabel="Salvar lancamento" className="mt-4 space-y-4">
+                <ActionStateForm action={createFinancialEntryAction} submitLabel="Salvar lançamento" className="mt-4 space-y-4">
                   <input type="hidden" name="pelada_id" value={id} />
                   <Field label="Tipo"><select name="type"><option value="revenue">Receita</option><option value="expense">Despesa</option></select></Field>
-                  <Field label="Descricao"><input name="description" required placeholder="Aluguel do campo" /></Field>
+                  <Field label="Descrição"><input name="description" required placeholder="Aluguel do campo" /></Field>
                   <Field label="Data"><input name="entry_date" type="date" required defaultValue={new Date().toISOString().slice(0, 10)} /></Field>
                   <Field label="Valor"><input name="amount" type="number" min="0.01" step="0.01" required /></Field>
-                  <Field label="Observacao"><textarea name="notes" rows={2} /></Field>
+                  <Field label="Observação"><textarea name="notes" rows={2} /></Field>
                 </ActionStateForm>
               </Card>
 
               <Card>
-                <CardTitle icon={ClipboardList}>Resumo dos lancamentos</CardTitle>
+                <CardTitle icon={ClipboardList}>Resumo dos lançamentos</CardTitle>
                 <div className="mt-4 space-y-2">
                   {entries?.slice(0, 5).map((entry: any) => (
                     <div key={entry.id} className="flex justify-between gap-3 rounded-2xl border border-slate-200 p-3 text-sm">
@@ -126,13 +126,13 @@ export default async function FinancePage({ params }: { params: Promise<{ id: st
                       <strong className={entry.type === "revenue" ? "text-field-700" : "text-red-600"}>{entry.type === "revenue" ? "+" : "-"}{brl(entry.amount)}</strong>
                     </div>
                   ))}
-                  {!entries?.length ? <p className="text-sm text-slate-600">Nenhum lancamento ainda.</p> : null}
+                  {!entries?.length ? <p className="text-sm text-slate-600">Nenhum lançamento ainda.</p> : null}
                 </div>
               </Card>
             </div>
 
             <Card>
-              <CardTitle icon={Banknote}>Lancamentos</CardTitle>
+              <CardTitle icon={Banknote}>Lançamentos</CardTitle>
               <div className="mt-4 space-y-2">
                 {entries?.map((entry: any) => (
                   <div key={entry.id} className="flex justify-between gap-3 rounded-2xl border border-slate-200 p-3 text-sm">
@@ -148,7 +148,7 @@ export default async function FinancePage({ params }: { params: Promise<{ id: st
           <div className="grid gap-6">
             <div className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
               <Card>
-                <CardTitle icon={CircleDollarSign}>Nova cobranca em lote</CardTitle>
+                <CardTitle icon={CircleDollarSign}>Nova cobrança em lote</CardTitle>
                 <p className="mt-3 text-sm text-slate-600">
                   As cobranças em lote são geradas apenas para membros do tipo {memberTypeLabel("monthly").toLowerCase()}.
                 </p>
@@ -156,21 +156,21 @@ export default async function FinancePage({ params }: { params: Promise<{ id: st
               </Card>
 
               <Card>
-                <CardTitle icon={BellRing}>Pagamentos aguardando aprovacao</CardTitle>
+                <CardTitle icon={BellRing}>Pagamentos aguardando aprovação</CardTitle>
                 <div className="mt-4 space-y-3">
                   {pendingPayments.map((payment: any) => (
                     <div key={payment.id} className="rounded-2xl border border-slate-200 p-3 text-sm">
                       <div className="flex items-start justify-between gap-3">
                         <div>
                           <strong className="text-slate-900">{memberName.get(payment.user_id) ?? "Jogador"}</strong>
-                          <p className="text-slate-600">{chargeById.get(payment.charge_id)?.description ?? "Cobranca"} - {brl(payment.amount)}</p>
+                          <p className="text-slate-600">{chargeById.get(payment.charge_id)?.description ?? "Cobrança"} - {brl(payment.amount)}</p>
                           {payment.proof_url ? (
                             proofLinks.get(payment.id) ? (
                               <a className="mt-2 inline-flex text-xs font-semibold text-field-700 hover:underline" href={proofLinks.get(payment.id)} target="_blank" rel="noreferrer">
                                 Abrir comprovante
                               </a>
                             ) : (
-                              <p className="text-xs text-slate-500">Comprovante indisponivel</p>
+                              <p className="text-xs text-slate-500">Comprovante indisponível</p>
                             )
                           ) : null}
                           {payment.notes ? <p className="text-xs text-slate-500">{payment.notes}</p> : null}
@@ -226,13 +226,13 @@ export default async function FinancePage({ params }: { params: Promise<{ id: st
             </Card>
 
             <Card>
-              <CardTitle icon={WalletCards}>Cobrancas criadas</CardTitle>
+              <CardTitle icon={WalletCards}>Cobranças criadas</CardTitle>
               <div className="mt-4 space-y-2">
                 {charges?.map((charge: any) => (
                   <div key={charge.id} className="flex items-start justify-between gap-3 rounded-2xl border border-slate-200 p-3 text-sm">
                     <div>
                       <strong className="text-slate-900">{memberName.get(charge.user_id) ?? "Jogador"}</strong> - <span className="text-slate-700">{charge.description}</span>
-                      <p className="text-slate-600">{brl(charge.amount)} - competencia {competenceLabel(charge.competence)}</p>
+                      <p className="text-slate-600">{brl(charge.amount)} - competência {competenceLabel(charge.competence)}</p>
                       <span className="mt-1 inline-flex rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold uppercase text-slate-700">
                         {chargeStatusLabel(charge.status)}
                       </span>
@@ -248,7 +248,7 @@ export default async function FinancePage({ params }: { params: Promise<{ id: st
                     ) : null}
                   </div>
                 ))}
-                {!charges?.length ? <p className="text-sm text-slate-600">Nenhuma cobranca criada.</p> : null}
+                {!charges?.length ? <p className="text-sm text-slate-600">Nenhuma cobrança criada.</p> : null}
               </div>
             </Card>
           </div>
@@ -271,14 +271,14 @@ function groupByCompetence(charges: any[], payments: any[], entries: any[]) {
   const ensure = (key: string) => result[key] ??= { charged: 0, paid: 0, expenses: 0 };
 
   charges.forEach((charge) => {
-    ensure(charge.competence ?? "Sem competencia").charged += Number(charge.amount);
+    ensure(charge.competence ?? "Sem competência").charged += Number(charge.amount);
   });
   const chargesById = new Map(charges.map((charge) => [charge.id, charge]));
   payments.filter((payment) => payment.status === "approved").forEach((payment) => {
-    ensure(chargesById.get(payment.charge_id)?.competence ?? "Sem competencia").paid += Number(payment.amount);
+    ensure(chargesById.get(payment.charge_id)?.competence ?? "Sem competência").paid += Number(payment.amount);
   });
   entries.filter((entry) => entry.type === "expense").forEach((entry) => {
-    ensure(entry.entry_date?.slice(0, 7) ?? "Sem competencia").expenses += Number(entry.amount);
+    ensure(entry.entry_date?.slice(0, 7) ?? "Sem competência").expenses += Number(entry.amount);
   });
 
   return result;

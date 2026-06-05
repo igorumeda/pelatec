@@ -23,7 +23,7 @@ export default async function EditPeladaPage({ params }: { params: Promise<{ id:
       </div>
       <PageHeader title="Editar pelada" theme="dark" />
       <Card>
-        <CardTitle icon={Settings}>Configuracoes da pelada</CardTitle>
+        <CardTitle icon={Settings}>Configurações da pelada</CardTitle>
         <ActionStateForm action={action}>
           <PeladaFormFields pelada={pelada} />
         </ActionStateForm>

@@ -20,7 +20,7 @@ export default function LoginPage() {
         <div className="mt-5">
           <ActionStateForm action={signInAction} submitLabel="Entrar">
             <Field label="E-mail">
-              <input name="email" type="email" required autoComplete="email" placeholder="voce@exemplo.com" />
+              <input name="email" type="email" required autoComplete="email" placeholder="você@exemplo.com" />
             </Field>
             <Field label="Senha">
               <input name="password" type="password" required autoComplete="current-password" placeholder="Sua senha" />

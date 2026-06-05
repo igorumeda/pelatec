@@ -11,7 +11,7 @@ export default async function NewPeladaPage() {
       <div className="mb-4">
         <BackLink href="/dashboard">Voltar ao painel</BackLink>
       </div>
-      <PageHeader title="Nova pelada" description="Configure os dados operacionais basicos. Voce sera o owner." theme="dark" />
+      <PageHeader title="Nova pelada" description="Configure os dados operacionais básicos. Você sera o owner." theme="dark" />
       <Card>
         <ActionStateForm action={createPeladaAction} submitLabel="Criar pelada">
           <PeladaFormFields />

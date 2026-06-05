@@ -141,8 +141,9 @@ export default async function PeladaDetailsPage({ params }: { params: Promise<{ 
   const nextRoundLimitLabel = nextRound?.player_limit
     ? `${nextRoundPresence.confirmed}/${nextRound.player_limit} jogadores`
     : `${nextRoundPresence.confirmed} confirmados`;
+  const peladaVenueLabel = pelada?.venue_address ?? pelada?.venue ?? null;
   const topMeta = [
-    pelada?.venue ? { icon: MapPin, label: pelada.venue } : null,
+    peladaVenueLabel ? { icon: MapPin, label: peladaVenueLabel } : null,
     pelada?.default_time ? { icon: Clock3, label: `Horário padrão ${pelada.default_time.slice(0, 5)}` } : null,
     pelada?.status ? { icon: CircleDollarSign, label: `Status ${peladaStatusLabel(pelada.status)}` } : null
   ].filter(Boolean) as { icon: typeof MapPin; label: string }[];
@@ -203,7 +204,7 @@ export default async function PeladaDetailsPage({ params }: { params: Promise<{ 
                       </p>
                       <div className="mt-3 flex flex-wrap gap-2 text-xs text-slate-600">
                         <Chip>{roundStatusLabel(nextRound.status)}</Chip>
-                        <Chip>{nextRound.venue ?? pelada?.venue ?? "Local não informado"}</Chip>
+                        <Chip>{nextRound.venue ?? peladaVenueLabel ?? "Local não informado"}</Chip>
                         <Chip>{nextRoundPresence.confirmed} confirmados</Chip>
                         <Chip>{nextRoundPresence.pending} pendentes</Chip>
                         {nextRound.player_limit ? <Chip>Limite {nextRound.player_limit}</Chip> : null}
@@ -269,7 +270,7 @@ export default async function PeladaDetailsPage({ params }: { params: Promise<{ 
                         {dateLabel(latestFinishedRound.round_date)} às {latestFinishedRound.starts_at.slice(0, 5)}
                       </p>
                       <div className="mt-3 flex flex-wrap gap-2 text-xs text-slate-600">
-                        <Chip>{latestFinishedRound.venue ?? pelada?.venue ?? "Local não informado"}</Chip>
+                        <Chip>{latestFinishedRound.venue ?? peladaVenueLabel ?? "Local não informado"}</Chip>
                         <Chip>{latestRoundPresence.confirmed} presentes</Chip>
                       </div>
                       {latestFinishedRound.notes ? <p className="mt-3 text-sm text-slate-600">{latestFinishedRound.notes}</p> : null}

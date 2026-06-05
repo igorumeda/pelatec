@@ -43,7 +43,7 @@ export function PlayerSkillRadar({ values }: { values: SkillShape }) {
         <div>
           <p className="text-[11px] uppercase tracking-[0.26em] text-cyan-200/80">Pontuacao geral</p>
           <p className="mt-2 text-5xl font-extrabold leading-none text-white">{totalPoints}</p>
-          <p className="mt-2 text-sm text-slate-300">Soma dos pontos distribuidos nas habilidades.</p>
+          <p className="mt-2 text-sm text-slate-300">Soma dos pontos distribuídos nas habilidades.</p>
         </div>
       </div>
 

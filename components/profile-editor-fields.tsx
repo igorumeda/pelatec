@@ -16,15 +16,15 @@ const playStyles = [
   "Armador",
   "Marcador",
   "Finalizador",
-  "Pulmao do time",
-  "Canhao de fora da area"
+  "Pulmão do time",
+  "Canhão de fora da área"
 ];
 
 const skillConfig = [
   { key: "shooting", label: "Chute" },
   { key: "dribbling", label: "Drible" },
   { key: "passing", label: "Passe" },
-  { key: "strength", label: "Forca" },
+  { key: "strength", label: "Força" },
   { key: "speed", label: "Velocidade" },
   { key: "defense", label: "Defesa" }
 ] as const;
@@ -79,7 +79,7 @@ export function ProfileEditorFields({ profile }: { profile: Partial<Profile> | n
 
     if (file.size > maxAvatarSizeBytes) {
       event.target.value = "";
-      setAvatarError(`A imagem deve ter no maximo ${maxAvatarSizeMb} MB.`);
+      setAvatarError(`A imagem deve ter no máximo ${maxAvatarSizeMb} MB.`);
       return;
     }
 
@@ -106,7 +106,7 @@ export function ProfileEditorFields({ profile }: { profile: Partial<Profile> | n
         <Field label="Nome">
           <input name="name" required defaultValue={profile?.name ?? ""} />
         </Field>
-        <Field label="Nome de usuario">
+        <Field label="Nome de usuário">
           <input
             name="username"
             required
@@ -128,7 +128,7 @@ export function ProfileEditorFields({ profile }: { profile: Partial<Profile> | n
         <Field label="Idade">
           <input name="age" type="number" min={10} max={99} defaultValue={profile?.age ?? ""} />
         </Field>
-        <Field label="Posicao">
+        <Field label="Posição">
           <select name="position" defaultValue={profile?.position ?? ""}>
             <option value="">Selecione</option>
             {positionOptions.map((position) => (
@@ -159,13 +159,13 @@ export function ProfileEditorFields({ profile }: { profile: Partial<Profile> | n
         </Field>
       </div>
 
-      <Field label="Descricao pessoal do jogador">
+      <Field label="Descrição pessoal do jogador">
         <textarea
           name="player_description"
           rows={5}
           maxLength={600}
           defaultValue={profile?.player_description ?? ""}
-          placeholder="Conte, com suas palavras, como voce joga, o que gosta de fazer em campo e que tipo de parceiro de time voce e."
+           placeholder="Conte, com suas palavras, como você joga, o que gosta de fazer em campo e que tipo de parceiro de time você é."
         />
       </Field>
 
@@ -175,7 +175,7 @@ export function ProfileEditorFields({ profile }: { profile: Partial<Profile> | n
             <div>
               <p className="text-sm font-semibold text-slate-900">Habilidades do jogador</p>
               <p className="mt-1 text-sm text-slate-600">
-                Distribua ate 10 pontos no total. Cada habilidade vai de 0 a 10.
+                Distribua até 10 pontos no total. Cada habilidade vai de 0 a 10.
               </p>
             </div>
             <div className="rounded-2xl border border-brand-700/20 bg-brand-700/8 px-3 py-2 text-right">
@@ -250,7 +250,7 @@ export function ProfileEditorFields({ profile }: { profile: Partial<Profile> | n
                 <span>
                   {avatarName
                     ? `Arquivo selecionado: ${avatarName}`
-                    : `Imagem JPG, PNG ou WebP ate ${maxAvatarSizeMb} MB. Ao salvar, ela substitui a foto atual.`}
+                    : `Imagem JPG, PNG ou WebP até ${maxAvatarSizeMb} MB. Ao salvar, ela substitui a foto atual.`}
                 </span>
                 <span className="inline-flex items-center gap-2 rounded-xl bg-brand-950 px-3 py-2 text-xs font-semibold text-white">
                   <ImageUp size={15} />
@@ -275,9 +275,9 @@ export function ProfileEditorFields({ profile }: { profile: Partial<Profile> | n
                 <Shield size={18} />
               </span>
               <div>
-                <p className="font-semibold text-slate-900">Perfil publico</p>
+                <p className="font-semibold text-slate-900">Perfil público</p>
                 <p className="mt-1 text-sm text-slate-600">
-                  Seu perfil fica disponivel para qualquer pessoa pelo seu nome de usuario.
+                  Seu perfil fica disponível para qualquer pessoa pelo seu nome de usuário.
                 </p>
               </div>
             </div>
@@ -285,7 +285,7 @@ export function ProfileEditorFields({ profile }: { profile: Partial<Profile> | n
               <div className="mt-4">
                 <LinkButton href={`/${profile.username}`} variant="secondary" className="w-full">
                   <ExternalLink size={16} />
-                  Ver perfil publico
+                  Ver perfil público
                 </LinkButton>
               </div>
             ) : null}

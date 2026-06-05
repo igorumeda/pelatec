@@ -15,6 +15,10 @@ type PublicPelada = {
   city: string | null;
   neighborhood: string | null;
   venue: string | null;
+  venue_address: string | null;
+  venue_place_id: string | null;
+  venue_lat: number | string | null;
+  venue_lng: number | string | null;
   preferred_weekdays: string | null;
   default_time: string | null;
   monthly_fee: number | string | null;
@@ -45,7 +49,7 @@ export default async function PublicPeladaPage({ params }: { params: Promise<{ s
 
   const bannerSrc = pelada.banner_url || defaultBanner;
   const crestSrc = pelada.crest_url || defaultCrest;
-  const location = [pelada.venue, pelada.neighborhood, pelada.city].filter(Boolean).join(" - ");
+  const location = [pelada.venue_address ?? pelada.venue, pelada.neighborhood, pelada.city].filter(Boolean).join(" - ");
   const averageQuality = Number(pelada.average_player_quality ?? 0);
 
   return (
@@ -66,7 +70,7 @@ export default async function PublicPeladaPage({ params }: { params: Promise<{ s
               <div className="relative h-32 w-32 shrink-0 overflow-hidden rounded-full border-4 border-white/25 bg-white shadow-2xl">
                 <Image
                   src={crestSrc}
-                  alt={`Brasao da pelada ${pelada.name}`}
+                  alt={`Brasão da pelada ${pelada.name}`}
                   fill
                   sizes="128px"
                   className="object-cover"
@@ -94,9 +98,9 @@ export default async function PublicPeladaPage({ params }: { params: Promise<{ s
         <Card>
           <CardTitle icon={MapPin}>Detalhes da pelada</CardTitle>
           <div className="mt-5 divide-y divide-panel-200">
-            <DetailRow label="Local" value={location || "Nao informado"} />
-            <DetailRow label="Dias preferenciais" value={pelada.preferred_weekdays || "Nao informado"} />
-            <DetailRow label="Horario padrao" value={pelada.default_time ? pelada.default_time.slice(0, 5) : "Nao informado"} />
+            <DetailRow label="Local" value={location || "Não informado"} />
+            <DetailRow label="Dias preferenciais" value={pelada.preferred_weekdays || "Não informado"} />
+            <DetailRow label="Horário padrao" value={pelada.default_time ? pelada.default_time.slice(0, 5) : "Não informado"} />
             <DetailRow label="Rodadas agendadas" value={String(pelada.scheduled_rounds_count)} />
             <DetailRow label="Rodadas realizadas" value={String(pelada.finished_rounds_count)} />
           </div>

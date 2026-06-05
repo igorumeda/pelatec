@@ -19,10 +19,10 @@ export default async function ConfirmSignupPage({
       <div className="mb-4">
         <BackLink href="/signup">Voltar ao cadastro</BackLink>
       </div>
-      <PageHeader title="Confirmar codigo" description={`Enviamos um codigo para ${email}.`} theme="dark" />
+      <PageHeader title="Confirmar código" description={`Enviamos um código para ${email}.`} theme="dark" />
       <Card>
         <CardTitle icon={ShieldCheck}>Verificacao por e-mail</CardTitle>
-        <ActionStateForm action={verifySignupCodeAction} submitLabel="Validar codigo">
+        <ActionStateForm action={verifySignupCodeAction} submitLabel="Validar código">
           <input type="hidden" name="email" value={email} />
           <Field label="Codigo">
             <input name="token" inputMode="numeric" minLength={6} maxLength={6} required autoComplete="one-time-code" />

@@ -132,7 +132,7 @@ export default async function PublicPlayerProfilePage({
                     Informacoes do jogador
                   </p>
                   <p className="text-sm text-slate-300">
-                    Perfil publico com estilo de card de jogo.
+                    Perfil público com estilo de card de jogo.
                   </p>
                 </div>
               </div>
@@ -249,7 +249,7 @@ export default async function PublicPlayerProfilePage({
                         <p className="mt-1 text-base font-semibold text-white">
                           {profile.position
                             ? playerPositionLabel(profile.position)
-                            : "Nao informado"}
+                            : "Não informado"}
                         </p>
                       </div>
                       <div className="rounded-2xl bg-white/6 p-3">
@@ -268,7 +268,7 @@ export default async function PublicPlayerProfilePage({
                     </p>
                     <p className="mt-3 whitespace-pre-line text-sm leading-6 text-slate-100">
                       {profile.player_description ||
-                        "Este jogador ainda nao escreveu sua descricao pessoal."}
+                        "Este jogador ainda não escreveu sua descricao pessoal."}
                     </p>
                   </div>
                 </div>

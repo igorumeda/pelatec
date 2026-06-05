@@ -12,7 +12,7 @@ export default async function RoundsPage({ params }: { params: Promise<{ id: str
   await requireUser();
   const role = await getMyRole(id);
   const supabase = await createClient();
-  const { data: pelada } = await supabase.from("peladas").select("name, venue, default_time").eq("id", id).single();
+  const { data: pelada } = await supabase.from("peladas").select("name, venue, venue_address, default_time").eq("id", id).single();
   const { data: rounds } = await supabase
     .from("rounds")
     .select("*")
@@ -37,7 +37,7 @@ export default async function RoundsPage({ params }: { params: Promise<{ id: str
                   <p className="font-medium text-slate-900">{round.title ?? "Rodada"}</p>
                   <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold uppercase text-slate-700">{roundStatusLabel(round.status)}</span>
                 </div>
-                <p className="mt-1 text-sm text-slate-600">{dateLabel(round.round_date)} as {round.starts_at.slice(0, 5)}</p>
+                <p className="mt-1 text-sm text-slate-600">{dateLabel(round.round_date)} às {round.starts_at.slice(0, 5)}</p>
               </Link>
             ))}
           </div>
@@ -48,12 +48,12 @@ export default async function RoundsPage({ params }: { params: Promise<{ id: str
             <CardTitle icon={CalendarPlus2}>Criar rodada</CardTitle>
             <ActionStateForm action={action} submitLabel="Criar" className="mt-4 space-y-4">
               <input type="hidden" name="pelada_id" value={id} />
-              <Field label="Titulo"><input name="title" placeholder="Rodada de quinta" /></Field>
+              <Field label="Título"><input name="title" placeholder="Rodada de quinta" /></Field>
               <Field label="Data"><input name="round_date" type="date" required /></Field>
-              <Field label="Inicio"><input name="starts_at" type="time" required defaultValue={pelada?.default_time?.slice(0, 5) ?? ""} /></Field>
-              <Field label="Local"><input name="venue" defaultValue={pelada?.venue ?? ""} /></Field>
+              <Field label="Início"><input name="starts_at" type="time" required defaultValue={pelada?.default_time?.slice(0, 5) ?? ""} /></Field>
+              <Field label="Local"><input name="venue" defaultValue={pelada?.venue_address ?? pelada?.venue ?? ""} /></Field>
               <Field label="Limite de jogadores"><input name="player_limit" type="number" min="1" /></Field>
-              <Field label="Observacoes"><textarea name="notes" rows={3} /></Field>
+              <Field label="Observações"><textarea name="notes" rows={3} /></Field>
               <input type="hidden" name="status" value="scheduled" />
             </ActionStateForm>
           </Card>

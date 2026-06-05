@@ -9,7 +9,7 @@ import { createClient } from "@/lib/supabase/server";
 import { dateLabel } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
-export const revalidate = 0;
+export const reválidate = 0;
 
 type PresenceStatus = "confirmed" | "declined" | "pending";
 
@@ -127,9 +127,9 @@ export default async function RoundDetailsPage({ params }: { params: Promise<{ i
               <CardTitle icon={CalendarCog}>Editar rodada</CardTitle>
               <ActionStateForm action={editAction} submitLabel="Salvar" className="mt-4 space-y-4">
                 <input type="hidden" name="pelada_id" value={round.pelada_id} />
-                <Field label="Titulo"><input name="title" defaultValue={round.title ?? ""} /></Field>
+                <Field label="Título"><input name="title" defaultValue={round.title ?? ""} /></Field>
                 <Field label="Data"><input name="round_date" type="date" required defaultValue={round.round_date} /></Field>
-                <Field label="Inicio"><input name="starts_at" type="time" required defaultValue={round.starts_at.slice(0, 5)} /></Field>
+                <Field label="Início"><input name="starts_at" type="time" required defaultValue={round.starts_at.slice(0, 5)} /></Field>
                 <Field label="Local"><input name="venue" defaultValue={round.venue ?? round.peladas?.venue ?? ""} /></Field>
                 <Field label="Limite"><input name="player_limit" type="number" min="1" defaultValue={round.player_limit ?? ""} /></Field>
                 <Field label="Status">
@@ -139,7 +139,7 @@ export default async function RoundDetailsPage({ params }: { params: Promise<{ i
                     <option value="cancelled">Cancelada</option>
                   </select>
                 </Field>
-                <Field label="Observacoes"><textarea name="notes" rows={3} defaultValue={round.notes ?? ""} /></Field>
+                <Field label="Observações"><textarea name="notes" rows={3} defaultValue={round.notes ?? ""} /></Field>
               </ActionStateForm>
             </Card>
           ) : null}

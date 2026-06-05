@@ -26,7 +26,7 @@ export default function SignupPage() {
               <input name="name" required autoComplete="name" placeholder="Seu nome" />
             </Field>
             <Field label="E-mail">
-              <input name="email" type="email" required autoComplete="email" placeholder="voce@exemplo.com" />
+              <input name="email" type="email" required autoComplete="email" placeholder="você@exemplo.com" />
             </Field>
           </ActionStateForm>
         </div>

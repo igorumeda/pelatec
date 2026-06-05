@@ -37,6 +37,10 @@ export type Pelada = {
   city: string | null;
   neighborhood: string | null;
   venue: string | null;
+  venue_address: string | null;
+  venue_place_id: string | null;
+  venue_lat: number | null;
+  venue_lng: number | null;
   preferred_weekdays: string | null;
   default_time: string | null;
   monthly_fee: number | string | null;

@@ -52,7 +52,7 @@ function actionError(error: unknown) {
   ) {
     const message = "message" in error ? String((error as { message?: string }).message) : "";
     if (message.includes("peladas_public_slug")) {
-      return { ok: false, message: "Essa URL publica da pelada ja esta em uso. Tente outra." };
+      return { ok: false, message: "Essa URL pública da pelada já esta em uso. Tente outra." };
     }
     return { ok: false, message: "Esse nome de usuário já está em uso. Tente outro." };
   }
@@ -69,7 +69,7 @@ async function getAuthenticatedStorageClient(supabase: Awaited<ReturnType<typeof
   } = await supabase.auth.getSession();
 
   if (!session?.access_token) {
-    throw new Error("Sua sessao expirou. Entre novamente para enviar imagens.");
+    throw new Error("Sua sessão expirou. Entre novamente para enviar imagens.");
   }
 
   return createSupabaseJsClient(
@@ -110,11 +110,11 @@ async function uploadImageFromForm({
   if (!(image instanceof File) || image.size === 0) return currentUrl;
 
   if (!image.type.startsWith("image/")) {
-    throw new Error(`Selecione uma imagem valida para ${label}.`);
+    throw new Error(`Selecione uma imagem válida para ${label}.`);
   }
 
   if (image.size > 5 * 1024 * 1024) {
-    throw new Error(`A imagem de ${label} deve ter no maximo 5 MB.`);
+    throw new Error(`A imagem de ${label} deve ter no máximo 5 MB.`);
   }
 
   const storageClient = await getAuthenticatedStorageClient(supabase);
@@ -125,7 +125,7 @@ async function uploadImageFromForm({
     upsert: false
   });
 
-  if (uploadError) throw new Error(`Nao foi possivel enviar ${label}: ${uploadError.message}`);
+  if (uploadError) throw new Error(`Não foi possivel enviar ${label}: ${uploadError.message}`);
 
   const { data } = storageClient.storage.from(bucket).getPublicUrl(path);
   return data.publicUrl;
@@ -241,16 +241,16 @@ export async function updateProfileAction(_: unknown, formData: FormData) {
 
     if (avatar instanceof File && avatar.size > 0) {
       if (!avatar.type.startsWith("image/")) {
-        throw new Error("Selecione uma imagem valida para a foto de perfil.");
+        throw new Error("Selecione uma imagem válida para a foto de perfil.");
       }
       if (avatar.size > 5 * 1024 * 1024) {
-        throw new Error("A foto de perfil deve ter no maximo 5 MB.");
+        throw new Error("A foto de perfil deve ter no máximo 5 MB.");
       }
       const {
         data: { session }
       } = await supabase.auth.getSession();
       if (!session?.access_token) {
-        throw new Error("Sua sessao expirou. Entre novamente para enviar a foto.");
+        throw new Error("Sua sessão expirou. Entre novamente para enviar a foto.");
       }
       const storageClient = createSupabaseJsClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -273,7 +273,7 @@ export async function updateProfileAction(_: unknown, formData: FormData) {
         contentType: avatar.type || undefined,
         upsert: false
       });
-      if (uploadError) throw new Error(`Nao foi possivel enviar a foto: ${uploadError.message}`);
+      if (uploadError) throw new Error(`Não foi possivel enviar a foto: ${uploadError.message}`);
       const { data: publicAvatar } = storageClient.storage.from("profile-avatars").getPublicUrl(path);
       avatarUrl = publicAvatar.publicUrl;
     }

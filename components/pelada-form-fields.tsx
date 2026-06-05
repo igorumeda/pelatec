@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { ImageUp, Link2 } from "lucide-react";
+import { PlaceAutocompleteField } from "@/components/place-autocomplete-field";
 import { Field } from "@/components/ui";
 import { type Pelada } from "@/lib/types";
 
@@ -9,6 +10,16 @@ const maxAssetSizeMb = 5;
 const maxAssetSizeBytes = maxAssetSizeMb * 1024 * 1024;
 const defaultCrest = "/default-pelada-crest.svg";
 const defaultBanner = "/default-pelada-banner.svg";
+const weekdays = [
+  { value: "", label: "Selecione" },
+  { value: "monday", label: "Segunda-feira" },
+  { value: "tuesday", label: "Terça-feira" },
+  { value: "wednesday", label: "Quarta-feira" },
+  { value: "thursday", label: "Quinta-feira" },
+  { value: "friday", label: "Sexta-feira" },
+  { value: "saturday", label: "Sábado" },
+  { value: "sunday", label: "Domingo" }
+];
 
 type AssetState = {
   preview: string | null;
@@ -53,7 +64,7 @@ export function PeladaFormFields({ pelada }: { pelada?: Partial<Pelada> | null }
 
     if (file.size > maxAssetSizeBytes) {
       event.target.value = "";
-      setAsset({ preview: null, name: null, error: `A imagem deve ter no maximo ${maxAssetSizeMb} MB.` });
+      setAsset({ preview: null, name: null, error: `A imagem deve ter no máximo ${maxAssetSizeMb} MB.` });
       return;
     }
 
@@ -73,7 +84,7 @@ export function PeladaFormFields({ pelada }: { pelada?: Partial<Pelada> | null }
           </Field>
         </div>
         <div className="sm:col-span-2">
-          <Field label="Descricao">
+          <Field label="Descrição">
             <textarea name="description" rows={3} defaultValue={pelada?.description ?? ""} />
           </Field>
         </div>
@@ -84,35 +95,39 @@ export function PeladaFormFields({ pelada }: { pelada?: Partial<Pelada> | null }
           <input name="neighborhood" defaultValue={pelada?.neighborhood ?? ""} />
         </Field>
         <div className="sm:col-span-2">
-          <Field label="Local">
-            <input name="venue" defaultValue={pelada?.venue ?? ""} />
-          </Field>
+          <PlaceAutocompleteField
+            defaultName={pelada?.venue}
+            defaultAddress={pelada?.venue_address}
+            defaultPlaceId={pelada?.venue_place_id}
+            defaultLat={pelada?.venue_lat}
+            defaultLng={pelada?.venue_lng}
+          />
         </div>
-        <Field label="Dias preferenciais">
-          <input name="preferred_weekdays" placeholder="Ex.: tercas e quintas" defaultValue={pelada?.preferred_weekdays ?? ""} />
+        <Field label="Dia preferencial">
+          <select name="preferred_weekdays" defaultValue={pelada?.preferred_weekdays ?? ""}>
+            {weekdays.map((day) => (
+              <option key={day.value} value={day.value}>
+                {day.label}
+              </option>
+            ))}
+            {pelada?.preferred_weekdays && !weekdays.some((day) => day.value === pelada.preferred_weekdays) ? (
+              <option value={pelada.preferred_weekdays}>{pelada.preferred_weekdays}</option>
+            ) : null}
+          </select>
         </Field>
-        <Field label="Horario padrao">
-          <input name="default_time" type="time" defaultValue={pelada?.default_time?.slice(0, 5) ?? ""} />
+        <Field label="Horário padrão">
+          <input name="default_time" type="time" step="60" defaultValue={pelada?.default_time?.slice(0, 5) ?? ""} />
         </Field>
-        <Field label="Valor mensalista">
-          <input name="monthly_fee" type="number" step="0.01" min="0" defaultValue={pelada?.monthly_fee ?? ""} />
-        </Field>
-        <Field label="Valor diarista">
-          <input name="daily_fee" type="number" step="0.01" min="0" defaultValue={pelada?.daily_fee ?? ""} />
-        </Field>
+        <CurrencyField label="Valor mensalista" name="monthly_fee" defaultValue={pelada?.monthly_fee} />
+        <CurrencyField label="Valor diarista" name="daily_fee" defaultValue={pelada?.daily_fee} />
         {pelada?.id ? (
-          <Field label="Status">
-            <select name="status" defaultValue={pelada?.status ?? "active"}>
-              <option value="active">Ativa</option>
-              <option value="inactive">Inativa</option>
-            </select>
-          </Field>
+          <StatusFlag defaultStatus={pelada?.status ?? "active"} />
         ) : null}
       </div>
 
       <div className="grid gap-4 lg:grid-cols-[0.75fr,1.25fr]">
         <AssetPicker
-          label="Brasao da pelada"
+          label="Brasão da pelada"
           name="crest"
           currentUrl={pelada?.crest_url}
           defaultUrl={defaultCrest}
@@ -143,14 +158,14 @@ export function PeladaFormFields({ pelada }: { pelada?: Partial<Pelada> | null }
             className="mt-1 h-5 w-5 rounded border-panel-300 text-field-600"
           />
           <span>
-            <span className="block font-semibold text-slate-900">Pelada publica</span>
+            <span className="block font-semibold text-slate-900">Pelada pública</span>
             <span className="mt-1 block text-sm text-slate-600">
-              Quando ativada, qualquer pessoa podera ver a pagina publica da pelada pela URL definida abaixo.
+              Quando ativada, qualquer pessoa poderá ver a página pública da pelada pela URL definida abaixo.
             </span>
           </span>
         </label>
         <div className="mt-4">
-          <Field label="Nome da URL publica">
+          <Field label="Nome da URL pública">
             <div className="flex items-center gap-2 rounded-2xl border border-panel-200 bg-white/70 px-3 py-2">
               <Link2 size={16} className="shrink-0 text-slate-500" />
               <span className="hidden text-sm text-slate-500 sm:inline">/pelada/</span>
@@ -164,13 +179,87 @@ export function PeladaFormFields({ pelada }: { pelada?: Partial<Pelada> | null }
               />
             </div>
           </Field>
-          <p className="mt-2 text-xs text-slate-500">Use letras minusculas, numeros e hifen. Esse nome precisa ser unico.</p>
+          <p className="mt-2 text-xs text-slate-500">Use letras minúsculas, números e hífen. Esse nome precisa ser único.</p>
         </div>
       </div>
 
       {!pelada?.id ? <input type="hidden" name="status" value="active" /> : null}
     </div>
   );
+}
+
+function CurrencyField({
+  label,
+  name,
+  defaultValue
+}: {
+  label: string;
+  name: string;
+  defaultValue?: number | string | null;
+}) {
+  const initialAmount = parseCurrencyValue(defaultValue);
+  const [amount, setAmount] = useState(initialAmount);
+
+  return (
+    <Field label={label}>
+      <div className="flex items-center gap-2 rounded-xl border border-panel-200 bg-panel-50 px-3.5 py-2.5 text-sm text-slate-900 shadow-sm focus-within:border-field-500 focus-within:ring-4 focus-within:ring-field-100/70">
+        <span className="shrink-0 font-semibold text-slate-600">R$</span>
+        <input
+          type="text"
+          inputMode="numeric"
+          value={amount ? formatCurrencyDisplay(amount) : ""}
+          placeholder="0,00"
+          className="border-0 bg-transparent p-0 shadow-none focus:ring-0"
+          onChange={(event) => setAmount(currencyDigitsToDecimal(event.target.value))}
+        />
+        <input type="hidden" name={name} value={amount} />
+      </div>
+    </Field>
+  );
+}
+
+function StatusFlag({ defaultStatus }: { defaultStatus: "active" | "inactive" }) {
+  const [active, setActive] = useState(defaultStatus === "active");
+
+  return (
+    <div className="space-y-1.5">
+      <span className="block text-sm font-medium text-slate-700">Status</span>
+      <label className="flex min-h-11 cursor-pointer items-center justify-between gap-3 rounded-xl border border-panel-200 bg-panel-50 px-3.5 py-2.5">
+        <input type="hidden" name="status" value="inactive" />
+        <input
+          name="status"
+          type="checkbox"
+          value="active"
+          checked={active}
+          onChange={(event) => setActive(event.target.checked)}
+          className="sr-only"
+        />
+        <span className="text-sm font-semibold text-slate-800">{active ? "Ativa" : "Inativa"}</span>
+        <span className={`relative h-6 w-11 rounded-full transition ${active ? "bg-field-500" : "bg-slate-300"}`}>
+          <span className={`absolute top-1 h-4 w-4 rounded-full bg-white shadow transition ${active ? "left-6" : "left-1"}`} />
+        </span>
+      </label>
+    </div>
+  );
+}
+
+function parseCurrencyValue(value?: number | string | null) {
+  if (value === null || value === undefined || value === "") return "";
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed.toFixed(2) : "";
+}
+
+function currencyDigitsToDecimal(value: string) {
+  const digits = value.replace(/\D/g, "");
+  if (!digits) return "";
+  return (Number(digits) / 100).toFixed(2);
+}
+
+function formatCurrencyDisplay(value: string) {
+  return Number(value).toLocaleString("pt-BR", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  });
 }
 
 function AssetPicker({
@@ -210,7 +299,7 @@ function AssetPicker({
           Escolher imagem
         </span>
         <span className="text-center">
-          {state.name ? `Arquivo selecionado: ${state.name}` : `JPG, PNG ou WebP ate ${maxAssetSizeMb} MB.`}
+          {state.name ? `Arquivo selecionado: ${state.name}` : `JPG, PNG ou WebP até ${maxAssetSizeMb} MB.`}
         </span>
         {state.error ? <span className="text-center text-sm font-medium text-red-600">{state.error}</span> : null}
         <input name={name} type="file" accept="image/png,image/jpeg,image/webp" className="sr-only" onChange={onChange} />

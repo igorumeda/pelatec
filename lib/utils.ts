@@ -22,7 +22,7 @@ export function dateLabel(value: string) {
 }
 
 export function competenceLabel(value: string | null | undefined) {
-  if (!value) return "Sem competencia";
+  if (!value) return "Sem competência";
   const match = /^(\d{4})-(\d{2})$/.exec(value);
   if (!match) return value;
 

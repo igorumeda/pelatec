@@ -50,7 +50,10 @@ cp .env.example .env.local
 ```bash
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
+NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=
 ```
+
+Para o cadastro de local real da pelada, habilite a Maps JavaScript API e a Places API no Google Cloud e informe a chave em `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY`.
 
 5. Rode o app:
 

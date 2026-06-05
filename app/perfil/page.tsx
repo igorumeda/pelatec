@@ -24,7 +24,7 @@ export default async function ProfilePage() {
           profile?.username ? (
             <LinkButton href={`/${profile.username}`} variant="secondary" className="w-full sm:w-auto">
               <ShieldCheck size={16} />
-              Ver perfil publico
+              Ver perfil público
             </LinkButton>
           ) : null
         }

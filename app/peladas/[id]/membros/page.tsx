@@ -64,7 +64,7 @@ export default async function MembersPage({ params }: { params: Promise<{ id: st
             <CardTitle icon={ShieldPlus}>Adicionar membro</CardTitle>
             <ActionStateForm action={addMemberAction} submitLabel="Adicionar" className="mt-4 space-y-4">
               <input type="hidden" name="pelada_id" value={id} />
-              <Field label="E-mail do usuario">
+              <Field label="E-mail do usuário">
                 <input name="email" type="email" required />
               </Field>
               <Field label="Permissão">

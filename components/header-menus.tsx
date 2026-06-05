@@ -47,7 +47,7 @@ export function UserMenu({ profile, notifications }: UserMenuProps) {
       <button
         type="button"
         className="relative inline-flex h-11 w-11 items-center justify-center rounded-full text-white transition hover:opacity-90"
-        aria-label="Menu do usuario"
+        aria-label="Menu do usuário"
         onClick={() => setOpen((value) => !value)}
       >
         <UserAvatar
@@ -121,7 +121,7 @@ export function UserMenu({ profile, notifications }: UserMenuProps) {
                   </Link>
                 ))
               ) : (
-                <div className="px-3 py-4 text-sm text-slate-500">Nenhuma notificacao por enquanto.</div>
+                <div className="px-3 py-4 text-sm text-slate-500">Nenhuma notificação por enquanto.</div>
               )}
             </div>
           </div>
