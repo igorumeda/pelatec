@@ -119,7 +119,7 @@ export default async function HomePage() {
       <section id="como-funciona" className="space-y-6">
         <div className="max-w-3xl">
           <p className="section-kicker">Como funciona</p>
-          <h2 className="mt-2 text-3xl font-extrabold tracking-tight text-brand-950 sm:text-4xl">
+          <h2 className="mt-2 text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
             Um fluxo simples para quem organiza e para quem só quer chegar e jogar.
           </h2>
           <p className="mt-3 text-base leading-7 text-slate-600">
@@ -156,7 +156,7 @@ export default async function HomePage() {
 
       <section className="grid gap-6 lg:grid-cols-[0.94fr_1.06fr] lg:items-center">
         <div className="surface-dark p-7">
-          <p className="section-kicker text-field-200">Produto de verdade</p>
+          <p className="section-kicker">Produto de verdade</p>
           <h2 className="mt-2 text-3xl font-extrabold tracking-tight">Operação concentrada em um painel que ajuda no dia a dia.</h2>
           <p className="mt-4 text-sm leading-7 text-slate-200">
             O Pelatec não é só uma landing bonita. A proposta é mostrar logo na home que existe um software por trás, com rotina de
@@ -220,7 +220,7 @@ export default async function HomePage() {
 
         <div className="space-y-4">
           <p className="section-kicker">Valor operacional</p>
-          <h2 className="text-3xl font-extrabold tracking-tight text-brand-950">
+          <h2 className="text-3xl font-extrabold tracking-tight text-white">
             Menos caos no grupo. Mais clareza para organizar a próxima bola.
           </h2>
           <Benefit icon={UserPlus} title="Conecte jogadores ao jogo" text="O produto já nasce com cara de plataforma, não só de agenda de presença." />
@@ -233,7 +233,7 @@ export default async function HomePage() {
       <section className="surface-panel px-6 py-8 sm:px-8">
         <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
           <div className="max-w-2xl">
-            <p className="section-kicker">Pronto para jogar melhor organizado</p>
+            <p className="section-kicker-dark">Pronto para jogar melhor organizado</p>
             <h2 className="mt-2 text-3xl font-extrabold tracking-tight text-brand-950">
               A pelada mais organizada começa com presença, sorteio e caixa no mesmo lugar.
             </h2>

@@ -54,6 +54,10 @@ button {
   }
 
   .section-kicker {
-    @apply text-xs font-semibold uppercase tracking-[0.24em] text-brand-900;
+    @apply text-xs font-semibold uppercase tracking-[0.24em] text-gray-300;
+  }
+
+  .section-kicker-dark {
+    @apply text-xs font-semibold uppercase tracking-[0.24em] text-brand-700;
   }
 }
