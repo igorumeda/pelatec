@@ -4,6 +4,7 @@ import { unstable_noStore as noStore } from "next/cache";
 import { Sparkles } from "lucide-react";
 import { BrandLogo } from "@/components/brand-logo";
 import { UserMenu } from "@/components/header-menus";
+import { RestrictedNav } from "@/components/restricted-nav";
 import { getUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import "./globals.css";
@@ -103,11 +104,13 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     );
   }
 
+  const profileHref = profile?.username ? `/${profile.username}` : "/perfil";
+
   return (
     <html lang="pt-BR">
       <body>
         <header className="sticky top-0 z-20 border-b border-brand-700/80 bg-brand-950/92 backdrop-blur">
-          <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3">
+          <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-x-4 px-4 py-3">
             <Link href={user ? "/dashboard" : "/"} className="flex items-center gap-3 text-white">
               <BrandLogo variant="icon" className="h-10 w-10 shrink-0" />
               <div className="hidden sm:block">
@@ -115,6 +118,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                 <p className="mt-1 text-[11px] uppercase tracking-[0.22em] text-slate-200">Organize, conecte e jogue</p>
               </div>
             </Link>
+
+            {user && profile ? <RestrictedNav profileHref={profileHref} /> : null}
 
             <nav className="flex items-center gap-2">
               {user && profile ? (

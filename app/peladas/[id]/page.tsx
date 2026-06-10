@@ -8,11 +8,11 @@ import {
   Clock3,
   MapPin,
   ReceiptText,
-  Settings
+  UsersRound
 } from "lucide-react";
 import { redirect } from "next/navigation";
 import { PeladaQuickActionsMenu } from "@/components/pelada-quick-actions-menu";
-import { BackLink, Card, CardTitle, EmptyState, LinkButton, PageHeader, Stat } from "@/components/ui";
+import { Card, CardTitle, EmptyState, LinkButton, PageHeader, Stat } from "@/components/ui";
 import { canManage, getMyRole, requireUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { brl, competenceLabel, dateLabel, peladaStatusLabel, roundStatusLabel } from "@/lib/utils";
@@ -151,10 +151,6 @@ export default async function PeladaDetailsPage({ params }: { params: Promise<{ 
 
   return (
     <>
-      <div className="mb-3 ml-2">
-        <BackLink href="/dashboard">Voltar ao painel</BackLink>
-      </div>
-
       <section className="surface-dark px-6 py-7 sm:px-8">
         <PageHeader
           title={pelada?.name ?? "Pelada"}
@@ -174,6 +170,12 @@ export default async function PeladaDetailsPage({ params }: { params: Promise<{ 
           </div>
         ) : null}
       </section>
+
+      <nav className="mt-4 flex gap-2 overflow-x-auto rounded-3xl border border-brand-700/45 bg-brand-950/55 p-2 shadow-soft" aria-label="Menu da pelada">
+        <PeladaNavLink href={`/peladas/${id}/rodadas`} icon={CalendarDays} label="Rodadas" />
+        <PeladaNavLink href={`/peladas/${id}/membros`} icon={UsersRound} label="Membros" />
+        {manageable ? <PeladaNavLink href={`/peladas/${id}/financeiro`} icon={CircleDollarSign} label="Financeiro" /> : null}
+      </nav>
 
       <div className={`mt-6 grid gap-4 ${manageable ? "sm:grid-cols-2 xl:grid-cols-5" : "sm:grid-cols-2 xl:grid-cols-4"}`}>
         <Stat label="Membros" value={members.length} description="Total de participantes vinculados" />
@@ -350,6 +352,26 @@ export default async function PeladaDetailsPage({ params }: { params: Promise<{ 
 
 function Chip({ children }: { children: React.ReactNode }) {
   return <span className="rounded-full bg-white px-2.5 py-1">{children}</span>;
+}
+
+function PeladaNavLink({
+  href,
+  icon: Icon,
+  label
+}: {
+  href: string;
+  icon: typeof CalendarDays;
+  label: string;
+}) {
+  return (
+    <Link
+      href={href}
+      className="inline-flex h-11 shrink-0 items-center gap-2 rounded-2xl px-4 text-sm font-semibold text-slate-100 hover:bg-white/10 hover:text-white"
+    >
+      <Icon size={17} className="text-field-200" />
+      {label}
+    </Link>
+  );
 }
 
 function Row({ label, value, highlight = false }: { label: string; value: React.ReactNode; highlight?: boolean }) {
