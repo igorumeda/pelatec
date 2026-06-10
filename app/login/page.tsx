@@ -1,16 +1,21 @@
 import Link from "next/link";
 import Image from "next/image";
+import { redirect } from "next/navigation";
 import { CheckCircle2, LogIn } from "lucide-react";
 import { signInAction } from "@/app/actions";
 import { ActionStateForm } from "@/components/action-state-form";
 import { BrandLogo } from "@/components/brand-logo";
 import { Card, CardTitle, Field, LinkButton, PageHeader } from "@/components/ui";
 import { GoogleAuthButton } from "@/components/google-auth-button";
+import { getUser } from "@/lib/auth";
 
 const authImage =
   "https://images.pexels.com/photos/6077792/pexels-photo-6077792.jpeg?cs=srgb&dl=pexels-tima-miroshnichenko-6077792.jpg&fm=jpg";
 
-export default function LoginPage() {
+export default async function LoginPage() {
+  const user = await getUser();
+  if (user) redirect("/dashboard");
+
   return (
     <div className="grid gap-6 lg:grid-cols-[0.92fr_1.08fr] lg:items-stretch">
       <Card className="order-2 lg:order-1 lg:p-7">

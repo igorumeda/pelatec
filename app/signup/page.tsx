@@ -1,16 +1,21 @@
 import Link from "next/link";
 import Image from "next/image";
+import { redirect } from "next/navigation";
 import { Mail, Sparkles, UserPlus } from "lucide-react";
 import { signUpAction } from "@/app/actions";
 import { ActionStateForm } from "@/components/action-state-form";
 import { BrandLogo } from "@/components/brand-logo";
 import { Card, CardTitle, Field, LinkButton, PageHeader } from "@/components/ui";
 import { GoogleAuthButton } from "@/components/google-auth-button";
+import { getUser } from "@/lib/auth";
 
 const signupImage =
   "https://images.pexels.com/photos/5235779/pexels-photo-5235779.jpeg?cs=srgb&dl=pexels-cottonbro-5235779.jpg&fm=jpg";
 
-export default function SignupPage() {
+export default async function SignupPage() {
+  const user = await getUser();
+  if (user) redirect("/dashboard");
+
   return (
     <div className="grid gap-6 lg:grid-cols-[0.98fr_1.02fr] lg:items-stretch">
       <Card className="order-2 lg:order-1 lg:p-7">

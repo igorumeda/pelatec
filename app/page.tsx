@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
+import { redirect } from "next/navigation";
 import { ArrowRight, CalendarDays, CheckCircle2, CircleDollarSign, MapPin, Search, Shuffle, UserPlus, UsersRound } from "lucide-react";
 import { BrandLogo } from "@/components/brand-logo";
 import { Card, LinkButton } from "@/components/ui";
@@ -37,8 +38,10 @@ const features = [
 
 export default async function HomePage() {
   const user = await getUser();
-  const primaryHref = user ? "/dashboard" : "/signup";
-  const primaryLabel = user ? "Abrir painel" : "Começar agora";
+  if (user) redirect("/dashboard");
+
+  const primaryHref = "/signup";
+  const primaryLabel = "Começar agora";
 
   return (
     <div className="space-y-16 pb-10">
