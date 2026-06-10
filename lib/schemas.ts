@@ -230,3 +230,8 @@ export const cancelPaymentSchema = z.object({
   payment_id: z.string().uuid("Pagamento inválido"),
   pelada_id: z.string().uuid("Pelada inválida")
 });
+
+export const userLocationSchema = z.object({
+  lat: z.coerce.number().min(-90, "Latitude inválida").max(90, "Latitude inválida"),
+  lng: z.coerce.number().min(-180, "Longitude inválida").max(180, "Longitude inválida")
+});

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, ShieldCheck, UsersRound } from "lucide-react";
+import { Compass, LayoutDashboard, ShieldCheck, UsersRound } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type RestrictedNavProps = {
@@ -21,6 +21,12 @@ const links = [
     label: "Minhas Peladas",
     icon: UsersRound,
     matches: (pathname: string) => pathname === "/peladas" || pathname.startsWith("/peladas/")
+  },
+  {
+    href: "/explorar",
+    label: "Explorar",
+    icon: Compass,
+    matches: (pathname: string) => pathname === "/explorar"
   }
 ];
 

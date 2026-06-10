@@ -27,6 +27,9 @@ export type Profile = {
   strength: number;
   speed: number;
   defense: number;
+  last_lat: number | null;
+  last_lng: number | null;
+  last_location_at: string | null;
   created_at: string;
 };
 

@@ -28,6 +28,7 @@ import {
   roundSchema,
   reviewPaymentSchema,
   signupSchema,
+  userLocationSchema,
   verifySignupCodeSchema
 } from "@/lib/schemas";
 import { createClient } from "@/lib/supabase/server";
@@ -860,4 +861,27 @@ export async function cancelPaymentAction(formData: FormData) {
   revalidatePath(`/peladas/${input.pelada_id}/financeiro`);
   revalidatePath("/dashboard");
   revalidateAppShell();
+}
+
+export async function updateUserLocationAction(payload: unknown) {
+  const user = await requireUser();
+  const supabase = await createClient();
+
+  try {
+    const input = userLocationSchema.parse(payload);
+    const { error } = await supabase
+      .from("profiles")
+      .update({
+        last_lat: input.lat,
+        last_lng: input.lng,
+        last_location_at: new Date().toISOString()
+      })
+      .eq("id", user.id);
+
+    if (error) throw error;
+    revalidatePath("/explorar");
+    return { ok: true, message: "Localização atualizada" };
+  } catch (error) {
+    return actionError(error);
+  }
 }
