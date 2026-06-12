@@ -155,26 +155,12 @@ export async function verifySignupCodeAction(_: unknown, formData: FormData) {
   const supabase = await createClient();
   try {
     const input = verifySignupCodeSchema.parse(values(formData));
-    const { data, error } = await supabase.auth.verifyOtp({
+    const { error } = await supabase.auth.verifyOtp({
       email: input.email,
       token: input.token,
       type: "email"
     });
     if (error) throw error;
-
-    if (data.user) {
-      const fallbackName = typeof data.user.user_metadata?.name === "string" && data.user.user_metadata.name.trim()
-        ? data.user.user_metadata.name
-        : data.user.email?.split("@")[0] ?? "Jogador";
-
-      const { error: profileError } = await supabase.from("profiles").upsert({
-        id: data.user.id,
-        name: fallbackName,
-        email: data.user.email ?? ""
-      });
-
-      if (profileError) throw profileError;
-    }
   } catch (error) {
     return actionError(error);
   }
@@ -224,12 +210,13 @@ export async function updatePasswordAction(_: unknown, formData: FormData) {
   } catch (error) {
     return actionError(error);
   }
-  redirect("/dashboard");
+  redirect("/onboarding");
 }
 
 export async function updateProfileAction(_: unknown, formData: FormData) {
   const user = await requireUser();
   const supabase = await createClient();
+  let redirectTo: string | null = null;
   try {
     const { data: currentProfile } = await supabase
       .from("profiles")
@@ -279,18 +266,25 @@ export async function updateProfileAction(_: unknown, formData: FormData) {
       avatarUrl = publicAvatar.publicUrl;
     }
 
-    const { error } = await supabase.from("profiles").update({ ...input, avatar_url: avatarUrl }).eq("id", user.id);
+    const { error } = await supabase.from("profiles").upsert({
+      id: user.id,
+      email: user.email ?? "",
+      ...input,
+      avatar_url: avatarUrl
+    });
     if (error) throw error;
+    redirectTo = formData.get("_redirect_to") === "/dashboard" ? "/dashboard" : null;
     revalidatePath("/perfil");
     if (currentProfile?.username && currentProfile.username !== input.username) {
       revalidatePath(`/${currentProfile.username}`);
     }
     revalidatePath(`/${input.username}`);
     revalidateAppShell();
-    return { ok: true, message: "Perfil atualizado" };
+    if (!redirectTo) return { ok: true, message: "Perfil atualizado" };
   } catch (error) {
     return actionError(error);
   }
+  if (redirectTo) redirect(redirectTo);
 }
 
 export async function createPeladaAction(_: unknown, formData: FormData) {
@@ -323,15 +317,6 @@ export async function createPeladaAction(_: unknown, formData: FormData) {
       banner_url: bannerUrl,
       public_slug: input.public_slug ?? null
     };
-    const { error: profileError } = await supabase
-      .from("profiles")
-      .upsert({
-        id: user.id,
-        name: user.user_metadata?.name ?? user.email?.split("@")[0] ?? "Jogador",
-        email: user.email ?? ""
-      });
-    if (profileError) throw profileError;
-
     const { error } = await supabase
       .from("peladas")
       .insert({ id: peladaId, ...payload, created_by: user.id });

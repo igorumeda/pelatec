@@ -17,6 +17,7 @@ const reservedUsernames = new Set([
   "rodadas",
   "auth",
   "api",
+  "onboarding",
   "criar-senha",
   "atualizar-senha",
   "recuperar-senha"
@@ -47,13 +48,20 @@ export const passwordUpdateSchema = z.object({
 export const profileSchema = z.object({
   name: z.string().trim().min(2, "Informe seu nome"),
   username: z.string().trim().toLowerCase()
+    .min(3, "Informe um nome de usuário com ao menos 3 caracteres")
     .regex(/^[a-z0-9_]{3,20}$/, "Use 3 a 20 caracteres minúsculos, números ou underscore")
     .refine((value) => !reservedUsernames.has(value), "Esse nome de usuário não está disponível"),
   nickname: optionalText,
   phone: optionalText,
   avatar_url: optionalText,
   age: optionalInteger(10, 99, "Informe uma idade válida"),
-  position: z.enum(["striker", "midfielder", "fullback", "center_back", "goalkeeper"]).optional().or(z.literal("").transform(() => undefined)),
+  position: z.preprocess(
+    (value) => value === "" ? undefined : value,
+    z.enum(["striker", "midfielder", "fullback", "center_back", "goalkeeper"], {
+      required_error: "Selecione sua posição",
+      invalid_type_error: "Selecione sua posição"
+    })
+  ),
   height_cm: optionalInteger(120, 240, "Informe uma altura válida"),
   weight_kg: optionalInteger(35, 200, "Informe um peso válido"),
   play_style: optionalText,
@@ -66,10 +74,10 @@ export const profileSchema = z.object({
   defense: z.coerce.number().int("Informe um número inteiro").min(0, "O valor mínimo é 0").max(10, "O valor máximo é 10")
 }).superRefine((value, ctx) => {
   const total = value.shooting + value.dribbling + value.passing + value.strength + value.speed + value.defense;
-  if (total > 10) {
+  if (total !== 10) {
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
-      message: "Você pode distribuir no máximo 10 pontos entre as habilidades."
+      message: "Distribua todos os 10 pontos entre as habilidades."
     });
   }
 });

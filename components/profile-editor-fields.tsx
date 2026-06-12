@@ -129,7 +129,7 @@ export function ProfileEditorFields({ profile }: { profile: Partial<Profile> | n
           <input name="age" type="number" min={10} max={99} defaultValue={profile?.age ?? ""} />
         </Field>
         <Field label="Posição">
-          <select name="position" defaultValue={profile?.position ?? ""}>
+          <select name="position" required defaultValue={profile?.position ?? ""}>
             <option value="">Selecione</option>
             {positionOptions.map((position) => (
               <option key={position} value={position}>
@@ -175,7 +175,7 @@ export function ProfileEditorFields({ profile }: { profile: Partial<Profile> | n
             <div>
               <p className="text-sm font-semibold text-slate-900">Habilidades do jogador</p>
               <p className="mt-1 text-sm text-slate-600">
-                Distribua até 10 pontos no total. Cada habilidade vai de 0 a 10.
+                Distribua exatamente 10 pontos no total. Cada habilidade vai de 0 a 10.
               </p>
             </div>
             <div className="rounded-2xl border border-brand-700/20 bg-brand-700/8 px-3 py-2 text-right">
@@ -185,6 +185,11 @@ export function ProfileEditorFields({ profile }: { profile: Partial<Profile> | n
               </p>
             </div>
           </div>
+          {remainingPoints > 0 ? (
+            <p className="mt-3 text-sm font-medium text-amber-300">
+              Use os {remainingPoints} ponto(s) restante(s) antes de salvar.
+            </p>
+          ) : null}
 
           <div className="mt-5 space-y-4">
             {skillConfig.map((skill) => {
