@@ -1,7 +1,7 @@
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import { CalendarDays, MapPin, Shield, Sparkles, Users, WalletCards } from "lucide-react";
-import { Card, CardTitle } from "@/components/ui";
+import { CalendarDays, LayoutDashboard, MapPin, Shield, Sparkles, Users, WalletCards } from "lucide-react";
+import { Card, CardTitle, LinkButton } from "@/components/ui";
 import { brl } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/server";
 
@@ -51,6 +51,18 @@ export default async function PublicPeladaPage({ params }: { params: Promise<{ s
   const crestSrc = pelada.crest_url || defaultCrest;
   const location = [pelada.venue_address ?? pelada.venue, pelada.neighborhood, pelada.city].filter(Boolean).join(" - ");
   const averageQuality = Number(pelada.average_player_quality ?? 0);
+  const {
+    data: { user }
+  } = await supabase.auth.getUser();
+  const { data: membership } = user
+    ? await supabase
+      .from("pelada_members")
+      .select("role")
+      .eq("pelada_id", pelada.id)
+      .eq("user_id", user.id)
+      .maybeSingle()
+    : { data: null };
+  const canOpenPanel = membership?.role === "owner" || membership?.role === "admin";
 
   return (
     <div className="mx-auto max-w-6xl space-y-6">
@@ -65,6 +77,14 @@ export default async function PublicPeladaPage({ params }: { params: Promise<{ s
             className="object-cover"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-brand-950 via-brand-950/55 to-brand-950/10" />
+          {canOpenPanel ? (
+            <div className="absolute right-5 top-5 z-10">
+              <LinkButton href={`/peladas/${pelada.id}`} className="bg-white text-brand-950 hover:bg-slate-100">
+                <LayoutDashboard size={18} />
+                Acessar painel
+              </LinkButton>
+            </div>
+          ) : null}
           <div className="absolute inset-x-0 bottom-0 p-6 sm:p-8">
             <div className="flex flex-col gap-5 sm:flex-row sm:items-end">
               <div className="relative h-32 w-32 shrink-0 overflow-hidden rounded-full border-4 border-white/25 bg-white shadow-2xl">

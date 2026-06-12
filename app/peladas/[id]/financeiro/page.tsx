@@ -111,7 +111,7 @@ export default async function FinancePage({ params }: { params: Promise<{ id: st
                   <input type="hidden" name="pelada_id" value={id} />
                   <Field label="Tipo"><select name="type"><option value="revenue">Receita</option><option value="expense">Despesa</option></select></Field>
                   <Field label="Descrição"><input name="description" required placeholder="Aluguel do campo" /></Field>
-                  <Field label="Data"><input name="entry_date" type="date" required defaultValue={new Date().toISOString().slice(0, 10)} /></Field>
+                  <Field label="Data"><input name="entry_date" type="date" lang="pt-BR" required defaultValue={new Date().toISOString().slice(0, 10)} /></Field>
                   <Field label="Valor"><input name="amount" type="number" min="0.01" step="0.01" required /></Field>
                   <Field label="Observação"><textarea name="notes" rows={2} /></Field>
                 </ActionStateForm>

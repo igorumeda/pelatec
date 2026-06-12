@@ -12,7 +12,7 @@ export function ChargePaymentForm({ chargeId, amount }: { chargeId: string; amou
       <input type="hidden" name="charge_id" value={chargeId} />
       <div className="grid gap-3 sm:grid-cols-2">
         <Field label="Data">
-          <input name="paid_at" type="date" required defaultValue={new Date().toISOString().slice(0, 10)} />
+          <input name="paid_at" type="date" lang="pt-BR" required defaultValue={new Date().toISOString().slice(0, 10)} />
         </Field>
         <Field label="Valor">
           <input name="amount" type="number" min="0.01" step="0.01" required defaultValue={amount} />

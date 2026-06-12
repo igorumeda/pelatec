@@ -49,7 +49,7 @@ export default async function RoundsPage({ params }: { params: Promise<{ id: str
             <ActionStateForm action={action} submitLabel="Criar" className="mt-4 space-y-4">
               <input type="hidden" name="pelada_id" value={id} />
               <Field label="Título"><input name="title" placeholder="Rodada de quinta" /></Field>
-              <Field label="Data"><input name="round_date" type="date" required /></Field>
+              <Field label="Data"><input name="round_date" type="date" lang="pt-BR" required /></Field>
               <Field label="Início"><input name="starts_at" type="time" required defaultValue={pelada?.default_time?.slice(0, 5) ?? ""} /></Field>
               <Field label="Local"><input name="venue" defaultValue={pelada?.venue_address ?? pelada?.venue ?? ""} /></Field>
               <Field label="Limite de jogadores"><input name="player_limit" type="number" min="1" /></Field>

@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { CalendarDays, Compass, MapPin, Search, Sparkles, UsersRound } from "lucide-react";
 import { updateUserLocationAction } from "@/app/actions";
@@ -62,6 +63,7 @@ type UserCoords = {
 };
 
 type LocationSource = "saved" | "browser" | "manual";
+type ExploreTab = "peladas" | "players";
 
 type SavedLocationState = {
   coords: UserCoords;
@@ -80,6 +82,10 @@ type InitialLocation = {
 const defaultCrest = "/default-pelada-crest.svg";
 const defaultBanner = "/default-pelada-banner.svg";
 const mapsApiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+const tabParamByValue: Record<ExploreTab, string> = {
+  peladas: "peladas",
+  players: "jogadores"
+};
 
 const weekdayOptions = [
   ["", "Todos os dias"],
@@ -110,6 +116,10 @@ export function ExploreClient({
   players: ExplorePlayer[];
   initialLocation?: InitialLocation;
 }) {
+  const pathname = usePathname();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const initialTab = parseTabParam(searchParams.get("tipo"));
   const initialCoords = parseInitialLocation(initialLocation);
   const initialSource = initialLocation?.last_location_source === "manual" ? "manual" : initialCoords ? "saved" : "browser";
   const initialLocationLabel = initialLocation?.last_location_label?.trim();
@@ -118,7 +128,7 @@ export function ExploreClient({
       ? `Resultados ordenados por ${initialLocationLabel}.`
       : "Resultados ordenados pela sua última localização salva."
     : "Use sua localização para ordenar os resultados por proximidade.";
-  const [tab, setTab] = useState<"peladas" | "players">("peladas");
+  const [tab, setTab] = useState<ExploreTab>(initialTab);
   const [coords, setCoords] = useState<UserCoords | null>(initialCoords);
   const [locationMessage, setLocationMessage] = useState(initialMessage);
   const [locationSource, setLocationSource] = useState<LocationSource>(initialSource);
@@ -145,6 +155,17 @@ export function ExploreClient({
     requestLocation(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    setTab(parseTabParam(searchParams.get("tipo")));
+  }, [searchParams]);
+
+  function changeTab(nextTab: ExploreTab) {
+    setTab(nextTab);
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("tipo", tabParamByValue[nextTab]);
+    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+  }
 
   function saveLocation(nextCoords: UserCoords, message: string, source: LocationSource, label?: string) {
     setCoords(nextCoords);
@@ -305,10 +326,10 @@ export function ExploreClient({
       )}
 
       <div className="inline-flex rounded-2xl border border-panel-200 bg-white p-1 shadow-sm">
-        <TabButton active={tab === "peladas"} onClick={() => setTab("peladas")}>
+        <TabButton active={tab === "peladas"} onClick={() => changeTab("peladas")}>
           Explorar peladas
         </TabButton>
-        <TabButton active={tab === "players"} onClick={() => setTab("players")}>
+        <TabButton active={tab === "players"} onClick={() => changeTab("players")}>
           Explorar jogadores
         </TabButton>
       </div>
@@ -615,6 +636,10 @@ function parseInitialLocation(location?: InitialLocation) {
 
   if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
   return { lat, lng };
+}
+
+function parseTabParam(value: string | null): ExploreTab {
+  return value === "jogadores" || value === "players" ? "players" : "peladas";
 }
 
 function matchesSearch(values: Array<string | null | undefined>, search: string) {

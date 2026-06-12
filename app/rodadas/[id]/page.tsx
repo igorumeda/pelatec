@@ -9,7 +9,7 @@ import { createClient } from "@/lib/supabase/server";
 import { dateLabel } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
-export const reválidate = 0;
+export const revalidate = 0;
 
 type PresenceStatus = "confirmed" | "declined" | "pending";
 
@@ -128,7 +128,7 @@ export default async function RoundDetailsPage({ params }: { params: Promise<{ i
               <ActionStateForm action={editAction} submitLabel="Salvar" className="mt-4 space-y-4">
                 <input type="hidden" name="pelada_id" value={round.pelada_id} />
                 <Field label="Título"><input name="title" defaultValue={round.title ?? ""} /></Field>
-                <Field label="Data"><input name="round_date" type="date" required defaultValue={round.round_date} /></Field>
+                <Field label="Data"><input name="round_date" type="date" lang="pt-BR" required defaultValue={round.round_date} /></Field>
                 <Field label="Início"><input name="starts_at" type="time" required defaultValue={round.starts_at.slice(0, 5)} /></Field>
                 <Field label="Local"><input name="venue" defaultValue={round.venue ?? round.peladas?.venue ?? ""} /></Field>
                 <Field label="Limite"><input name="player_limit" type="number" min="1" defaultValue={round.player_limit ?? ""} /></Field>
