@@ -28,6 +28,15 @@ function usernameFromText(value: string) {
   return normalized;
 }
 
+function metadataText(metadata: Record<string, unknown> | undefined, keys: string[]) {
+  for (const key of keys) {
+    const value = metadata?.[key];
+    if (typeof value === "string" && value.trim()) return value.trim();
+  }
+
+  return null;
+}
+
 export async function GET(request: NextRequest) {
   const url = new URL(request.url);
   const code = url.searchParams.get("code");
@@ -41,17 +50,24 @@ export async function GET(request: NextRequest) {
     } = await supabase.auth.getUser();
 
     if (user) {
-      const fallbackName = typeof user.user_metadata?.name === "string" && user.user_metadata.name.trim()
-        ? user.user_metadata.name
-        : typeof user.user_metadata?.full_name === "string" && user.user_metadata.full_name.trim()
-          ? user.user_metadata.full_name
-          : user.email?.split("@")[0] ?? "Jogador";
+      const { data: currentProfile } = await supabase
+        .from("profiles")
+        .select("name, username, avatar_url")
+        .eq("id", user.id)
+        .maybeSingle();
+
+      const fallbackName =
+        metadataText(user.user_metadata, ["name", "full_name"]) ??
+        user.email?.split("@")[0] ??
+        "Jogador";
+      const googleAvatarUrl = metadataText(user.user_metadata, ["avatar_url", "picture"]);
 
       await supabase.from("profiles").upsert({
         id: user.id,
-        name: fallbackName,
+        name: currentProfile?.name ?? fallbackName,
         email: user.email ?? "",
-        username: usernameFromText(user.email?.split("@")[0] ?? fallbackName)
+        username: currentProfile?.username ?? usernameFromText(user.email?.split("@")[0] ?? fallbackName),
+        avatar_url: currentProfile?.avatar_url ?? googleAvatarUrl
       });
     }
   }
