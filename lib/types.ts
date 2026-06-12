@@ -6,6 +6,7 @@ export type PresenceStatus = "confirmed" | "declined" | "pending";
 export type FinancialEntryType = "revenue" | "expense";
 export type ChargeStatus = "open" | "paid" | "cancelled";
 export type PlayerPosition = "striker" | "midfielder" | "fullback" | "center_back" | "goalkeeper";
+export type LocationSource = "browser" | "manual";
 
 export type Profile = {
   id: string;
@@ -29,6 +30,8 @@ export type Profile = {
   defense: number;
   last_lat: number | null;
   last_lng: number | null;
+  last_location_label: string | null;
+  last_location_source: LocationSource | null;
   last_location_at: string | null;
   created_at: string;
 };

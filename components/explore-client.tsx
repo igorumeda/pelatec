@@ -2,9 +2,10 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useMemo, useState, useTransition } from "react";
-import { CalendarDays, Compass, MapPin, Search, SlidersHorizontal, Sparkles, UsersRound } from "lucide-react";
+import { useEffect, useMemo, useRef, useState, useTransition } from "react";
+import { CalendarDays, Compass, MapPin, Search, Sparkles, UsersRound } from "lucide-react";
 import { updateUserLocationAction } from "@/app/actions";
+import { loadGooglePlaces } from "@/components/place-autocomplete-field";
 import { DEFAULT_AVATAR_SRC } from "@/components/user-avatar";
 import { brl, cn, playerPositionLabel, totalSkillPoints } from "@/lib/utils";
 
@@ -60,8 +61,25 @@ type UserCoords = {
   lng: number;
 };
 
+type LocationSource = "saved" | "browser" | "manual";
+
+type SavedLocationState = {
+  coords: UserCoords;
+  source: LocationSource;
+  message: string;
+};
+
+type InitialLocation = {
+  last_lat: number | string | null;
+  last_lng: number | string | null;
+  last_location_at?: string | null;
+  last_location_label?: string | null;
+  last_location_source?: LocationSource | null;
+} | null;
+
 const defaultCrest = "/default-pelada-crest.svg";
 const defaultBanner = "/default-pelada-banner.svg";
+const mapsApiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
 
 const weekdayOptions = [
   ["", "Todos os dias"],
@@ -83,10 +101,32 @@ const positionOptions = [
   ["goalkeeper", "Goleiro"]
 ];
 
-export function ExploreClient({ peladas, players }: { peladas: ExplorePelada[]; players: ExplorePlayer[] }) {
+export function ExploreClient({
+  peladas,
+  players,
+  initialLocation
+}: {
+  peladas: ExplorePelada[];
+  players: ExplorePlayer[];
+  initialLocation?: InitialLocation;
+}) {
+  const initialCoords = parseInitialLocation(initialLocation);
+  const initialSource = initialLocation?.last_location_source === "manual" ? "manual" : initialCoords ? "saved" : "browser";
+  const initialLocationLabel = initialLocation?.last_location_label?.trim();
+  const initialMessage = initialCoords
+    ? initialLocationLabel
+      ? `Resultados ordenados por ${initialLocationLabel}.`
+      : "Resultados ordenados pela sua última localização salva."
+    : "Use sua localização para ordenar os resultados por proximidade.";
   const [tab, setTab] = useState<"peladas" | "players">("peladas");
-  const [coords, setCoords] = useState<UserCoords | null>(null);
-  const [locationMessage, setLocationMessage] = useState("Use sua localização para ordenar os resultados por proximidade.");
+  const [coords, setCoords] = useState<UserCoords | null>(initialCoords);
+  const [locationMessage, setLocationMessage] = useState(initialMessage);
+  const [locationSource, setLocationSource] = useState<LocationSource>(initialSource);
+  const [savedLocation, setSavedLocation] = useState<SavedLocationState | null>(
+    initialCoords ? { coords: initialCoords, source: initialSource, message: initialMessage } : null
+  );
+  const [manualError, setManualError] = useState("");
+  const [showLocationPanel, setShowLocationPanel] = useState(!initialCoords);
   const [isPending, startTransition] = useTransition();
 
   const [peladaSearch, setPeladaSearch] = useState("");
@@ -101,13 +141,49 @@ export function ExploreClient({ peladas, players }: { peladas: ExplorePelada[]; 
   const [playerMaxDistance, setPlayerMaxDistance] = useState("");
 
   useEffect(() => {
+    if (initialCoords) return;
     requestLocation(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  function saveLocation(nextCoords: UserCoords, message: string, source: LocationSource, label?: string) {
+    setCoords(nextCoords);
+    setLocationSource(source);
+    setLocationMessage(message);
+    setSavedLocation({ coords: nextCoords, source, message });
+    setManualError("");
+    setShowLocationPanel(false);
+
+    startTransition(async () => {
+      const response = await updateUserLocationAction({
+        ...nextCoords,
+        source: source === "manual" ? "manual" : "browser",
+        label: label || undefined
+      });
+      if (!response?.ok) {
+        setManualError(response?.message ?? "Não foi possível salvar a localização.");
+        setShowLocationPanel(true);
+      }
+    });
+  }
+
+  function restoreSavedLocation(errorMessage: string) {
+    if (!savedLocation) {
+      setLocationMessage(errorMessage);
+      setShowLocationPanel(true);
+      return;
+    }
+
+    setCoords(savedLocation.coords);
+    setLocationSource(savedLocation.source);
+    setLocationMessage(savedLocation.message);
+    setManualError(errorMessage);
+    setShowLocationPanel(false);
+  }
+
   function requestLocation(showErrors = true) {
     if (!navigator.geolocation) {
-      setLocationMessage("Seu navegador não oferece geolocalização.");
+      if (showErrors) restoreSavedLocation("Seu navegador não oferece geolocalização.");
       return;
     }
 
@@ -117,14 +193,12 @@ export function ExploreClient({ peladas, players }: { peladas: ExplorePelada[]; 
           lat: position.coords.latitude,
           lng: position.coords.longitude
         };
-        setCoords(nextCoords);
-        setLocationMessage("Resultados ordenados pela sua localização atual.");
-        startTransition(async () => {
-          await updateUserLocationAction(nextCoords);
-        });
+        saveLocation(nextCoords, "Resultados ordenados pela sua localização atual.", "browser");
       },
       () => {
-        if (showErrors) setLocationMessage("Não foi possível acessar sua localização. Confira a permissão do navegador.");
+        if (showErrors) {
+          restoreSavedLocation("Não foi possível acessar sua localização.");
+        }
       },
       { enableHighAccuracy: false, timeout: 8000, maximumAge: 1000 * 60 * 10 }
     );
@@ -184,21 +258,51 @@ export function ExploreClient({ peladas, players }: { peladas: ExplorePelada[]; 
 
   return (
     <div className="mt-5 space-y-5">
-      <div className="flex flex-col gap-3 rounded-2xl border border-panel-200 bg-panel-100/70 p-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <p className="font-semibold text-slate-900">Exploração por redondeza</p>
-          <p className="mt-1 text-sm text-slate-600">{locationMessage}</p>
+      {showLocationPanel ? (
+        <div className="rounded-2xl border border-panel-200 bg-panel-100/70 p-4">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="font-semibold text-slate-900">Exploração por redondeza</p>
+              <p className="mt-1 text-sm text-slate-600">{locationMessage}</p>
+            </div>
+            <button
+              type="button"
+              onClick={() => requestLocation(true)}
+              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-field-500 px-4 py-2.5 text-sm font-semibold text-white hover:bg-field-600 disabled:opacity-70"
+              disabled={isPending}
+            >
+              <Compass size={16} />
+              Usar localização
+            </button>
+          </div>
+
+          <div className="mt-4 border-t border-panel-200 pt-4">
+            <ManualLocationAddressField
+              onSelect={(nextCoords, label) => {
+                saveLocation(nextCoords, `Resultados ordenados por ${label}.`, "manual", label);
+              }}
+            />
+          </div>
+          {manualError ? <p className="mt-2 text-sm font-medium text-red-400">{manualError}</p> : null}
         </div>
-        <button
-          type="button"
-          onClick={() => requestLocation(true)}
-          className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-field-500 px-4 py-2.5 text-sm font-semibold text-white hover:bg-field-600 disabled:opacity-70"
-          disabled={isPending}
-        >
-          <Compass size={16} />
-          Usar localização
-        </button>
-      </div>
+      ) : (
+        <div className="flex flex-col gap-3 rounded-2xl border border-panel-200 bg-panel-100/70 p-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="font-semibold text-slate-900">
+              {locationSource === "manual" ? "Localização manual" : "Localização ativa"}
+            </p>
+            <p className="mt-1 text-sm text-slate-600">{locationMessage}</p>
+            {manualError ? <p className="mt-1 text-sm font-medium text-amber-300">{manualError}</p> : null}
+          </div>
+          <button
+            type="button"
+            onClick={() => setShowLocationPanel(true)}
+            className="inline-flex min-h-11 items-center justify-center rounded-xl border border-panel-200 bg-panel-50 px-4 py-2.5 text-sm font-semibold text-slate-900 hover:bg-panel-100"
+          >
+            Alterar localização
+          </button>
+        </div>
+      )}
 
       <div className="inline-flex rounded-2xl border border-panel-200 bg-white p-1 shadow-sm">
         <TabButton active={tab === "peladas"} onClick={() => setTab("peladas")}>
@@ -290,6 +394,96 @@ function FilterPanel({ children }: { children: React.ReactNode }) {
   return (
     <div className="grid gap-3 rounded-2xl border border-panel-200 bg-panel-100/70 p-3 md:grid-cols-2 xl:grid-cols-5">
       {children}
+    </div>
+  );
+}
+
+function ManualLocationAddressField({
+  onSelect
+}: {
+  onSelect: (coords: UserCoords, label: string) => void;
+}) {
+  const inputRef = useRef<HTMLInputElement | null>(null);
+  const [loaded, setLoaded] = useState(false);
+  const [displayValue, setDisplayValue] = useState("");
+  const [selectedAddress, setSelectedAddress] = useState("");
+  const [message, setMessage] = useState("");
+
+  useEffect(() => {
+    if (!mapsApiKey) {
+      setMessage("Busca por endereço indisponível. Configure a chave do Google Maps ou use latitude e longitude.");
+      return;
+    }
+
+    loadGooglePlaces(mapsApiKey)
+      .then(() => setLoaded(true))
+      .catch(() => setMessage("Não foi possível carregar a busca por endereço. Use latitude e longitude."));
+  }, []);
+
+  useEffect(() => {
+    if (!loaded || !inputRef.current || !window.google?.maps?.places?.Autocomplete) return;
+
+    const autocomplete = new window.google.maps.places.Autocomplete(inputRef.current, {
+      componentRestrictions: { country: "br" },
+      fields: ["formatted_address", "geometry", "name"]
+    });
+
+    const listener = autocomplete.addListener("place_changed", () => {
+      const place = autocomplete.getPlace();
+      const lat = place.geometry?.location?.lat?.();
+      const lng = place.geometry?.location?.lng?.();
+      const label = place.formatted_address || place.name || "localização manual";
+
+      if (typeof lat !== "number" || typeof lng !== "number") {
+        setMessage("Selecione uma opção válida da lista do Google Maps.");
+        return;
+      }
+
+      setDisplayValue(label);
+      setSelectedAddress(label);
+      setMessage("");
+      onSelect({ lat, lng }, label);
+    });
+
+    return () => {
+      listener?.remove?.();
+    };
+  }, [loaded, onSelect]);
+
+  const disabled = !mapsApiKey || !loaded;
+
+  return (
+    <div className="space-y-2">
+      <label className="block space-y-1 text-sm font-semibold text-slate-700">
+        Definir por endereço
+        <div
+          className={cn(
+            "flex items-center gap-2 rounded-xl border border-panel-200 bg-panel-50 px-3.5 py-2.5 text-sm text-slate-900 focus-within:border-field-500 focus-within:ring-4 focus-within:ring-field-100/70",
+            disabled && "opacity-70"
+          )}
+        >
+          <Search size={16} className="shrink-0 text-slate-500" />
+          <input
+            ref={inputRef}
+            value={displayValue}
+            onChange={(event) => {
+              setDisplayValue(event.target.value);
+              setSelectedAddress("");
+            }}
+            disabled={disabled}
+            placeholder={mapsApiKey ? "Busque por rua, bairro, cidade ou ponto de referência" : "Google Maps não configurado"}
+            autoComplete="off"
+            className="border-0 bg-transparent p-0 shadow-none focus:ring-0"
+          />
+        </div>
+      </label>
+      {selectedAddress ? (
+        <p className="flex items-start gap-2 text-xs text-slate-600">
+          <MapPin size={14} className="mt-0.5 shrink-0 text-field-700" />
+          <span>Localização selecionada: {selectedAddress}</span>
+        </p>
+      ) : null}
+      {message ? <p className="text-xs text-slate-600">{message}</p> : null}
     </div>
   );
 }
@@ -413,6 +607,14 @@ function EmptyResults({ text }: { text: string }) {
       {text}
     </div>
   );
+}
+
+function parseInitialLocation(location?: InitialLocation) {
+  const lat = Number(location?.last_lat);
+  const lng = Number(location?.last_lng);
+
+  if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
+  return { lat, lng };
 }
 
 function matchesSearch(values: Array<string | null | undefined>, search: string) {

@@ -142,7 +142,7 @@ export function PlaceAutocompleteField({
   );
 }
 
-function loadGooglePlaces(apiKey: string) {
+export function loadGooglePlaces(apiKey: string) {
   if (typeof window === "undefined") return Promise.resolve();
   if (window.google?.maps?.places) return Promise.resolve();
   if (window.__googleMapsPlacesPromise) return window.__googleMapsPlacesPromise;

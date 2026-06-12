@@ -233,5 +233,7 @@ export const cancelPaymentSchema = z.object({
 
 export const userLocationSchema = z.object({
   lat: z.coerce.number().min(-90, "Latitude inválida").max(90, "Latitude inválida"),
-  lng: z.coerce.number().min(-180, "Longitude inválida").max(180, "Longitude inválida")
+  lng: z.coerce.number().min(-180, "Longitude inválida").max(180, "Longitude inválida"),
+  label: z.string().trim().max(240, "A localização pode ter no máximo 240 caracteres").optional(),
+  source: z.enum(["browser", "manual"]).default("browser")
 });

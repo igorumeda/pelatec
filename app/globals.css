@@ -45,8 +45,96 @@ button {
 
 @layer utilities {
   .surface-panel {
-    @apply rounded-3xl border border-panel-200/80 bg-panel-50 shadow-soft backdrop-blur-sm;
-    background-color: rgba(245, 248, 253, 0.94);
+    @apply rounded-3xl border shadow-soft backdrop-blur-sm;
+    background:
+      radial-gradient(circle at top left, rgba(35, 209, 170, 0.10), transparent 38%),
+      linear-gradient(145deg, rgba(255, 255, 255, 0.10), rgba(15, 31, 58, 0.86));
+    border-color: rgba(125, 211, 252, 0.16);
+    color: #e5edf7;
+    box-shadow: 0 18px 44px rgba(2, 8, 23, 0.22);
+  }
+
+  .surface-panel :is(.text-slate-900, .text-slate-800, .text-slate-700, .text-brand-950, .text-brand-900) {
+    color: #f3f8ff;
+  }
+
+  .surface-panel :is(.text-slate-600, .text-slate-500) {
+    color: #b8c7d9;
+  }
+
+  .surface-panel :is(.text-field-700, .text-brand-700) {
+    color: #63e6be;
+  }
+
+  .surface-panel :is(.border-panel-200, .border-panel-300, .border-slate-200, .border-slate-100) {
+    border-color: rgba(148, 163, 184, 0.22);
+  }
+
+  .surface-panel :is(
+    .bg-white,
+    .bg-panel-50,
+    .bg-panel-100,
+    .bg-slate-50,
+    .bg-slate-100,
+    [class*="bg-white/"],
+    [class*="bg-panel-"],
+    [class*="bg-slate-50/"],
+    [class*="bg-slate-100/"]
+  ) {
+    background-color: rgba(255, 255, 255, 0.07);
+  }
+
+  .surface-panel :is(.bg-field-50, .bg-brand-700\/10, .bg-accent-100, [class*="bg-brand-700/"], [class*="bg-field-"]) {
+    background-color: rgba(16, 185, 129, 0.13);
+  }
+
+  .surface-panel :is(.bg-field-500, .bg-field-600) {
+    background-color: #10b981;
+  }
+
+  .surface-panel :is(.hover\:bg-panel-100:hover, .hover\:bg-slate-50:hover, .hover\:bg-white\/80:hover) {
+    background-color: rgba(255, 255, 255, 0.11);
+  }
+
+  .surface-panel :is(input, textarea, select) {
+    background-color: rgba(248, 250, 252, 0.94);
+    border-color: rgba(203, 213, 225, 0.55);
+    color: #0f172a;
+  }
+
+  .surface-panel :is(input:not([type="hidden"]), textarea, select) {
+    padding-left: 0.875rem;
+    padding-right: 0.875rem;
+  }
+
+  .surface-panel :is([class*="bg-transparent"] input:not([type="hidden"])) {
+    padding-left: 0.25rem;
+    padding-right: 0.25rem;
+    color: #f3f8ff;
+  }
+
+  .surface-panel :is([class*="bg-transparent"] input:not([type="hidden"]))::placeholder {
+    color: #cbd5e1;
+    opacity: 1;
+  }
+
+  .surface-panel :is(select) {
+    min-height: 2.75rem;
+  }
+
+  .surface-panel select option {
+    background-color: #ffffff;
+    color: #0f172a;
+  }
+
+  .surface-panel select option:checked {
+    background-color: #2563eb;
+    color: #ffffff;
+  }
+
+  .surface-panel :is(input, textarea, select)::placeholder {
+    color: #94a3b8;
+    opacity: 1;
   }
 
   .surface-dark {

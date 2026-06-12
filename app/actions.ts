@@ -874,6 +874,8 @@ export async function updateUserLocationAction(payload: unknown) {
       .update({
         last_lat: input.lat,
         last_lng: input.lng,
+        last_location_label: input.label || null,
+        last_location_source: input.source,
         last_location_at: new Date().toISOString()
       })
       .eq("id", user.id);
