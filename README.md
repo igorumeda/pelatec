@@ -50,16 +50,42 @@ cp .env.example .env.local
 ```bash
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
+SUPABASE_SERVICE_ROLE_KEY=
+DATABASE_URL=
 NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=
 ```
 
 Para o cadastro de local real da pelada, habilite a Maps JavaScript API e a Places API no Google Cloud e informe a chave em `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY`.
+
+`SUPABASE_SERVICE_ROLE_KEY` deve ser usada apenas no ambiente local/servidor. Ela e necessaria para rodar seeds que criam usuarios de teste no Supabase Auth.
 
 5. Rode o app:
 
 ```bash
 npm run dev
 ```
+
+## Dados de teste
+
+Depois de aplicar as migrations, voce pode criar jogadores, peladas, rodadas e financeiro de exemplo:
+
+```bash
+npm run db:seed-demo
+```
+
+O seed cria duas peladas publicas demo e usuarios de teste com a senha:
+
+```text
+Pelatec123!
+```
+
+Logins principais:
+
+- `ana.owner@pelatec.demo`
+- `bruno.admin@pelatec.demo`
+- `carlos.player@pelatec.demo`
+
+O script e idempotente para as peladas demo: ao rodar novamente, remove apenas as peladas com slugs `pelada-rarotec-demo` e `domingo-da-aurora-demo` e recria o cenario.
 
 ## Fluxo principal
 

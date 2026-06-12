@@ -9,7 +9,8 @@
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
     "db:migrate": "node scripts/db-migrate.mjs",
-    "db:baseline": "node scripts/db-mark-applied.mjs 0001_initial_schema.sql"
+    "db:baseline": "node scripts/db-mark-applied.mjs 0001_initial_schema.sql",
+    "db:seed-demo": "node scripts/seed-demo.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",
