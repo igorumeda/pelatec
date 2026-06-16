@@ -2,6 +2,7 @@
 
 import { useActionState, useMemo, useState } from "react";
 import { createBulkChargesAction } from "@/app/actions";
+import { DateInput } from "@/components/date-input";
 import { Button, Field } from "@/components/ui";
 
 type Member = {
@@ -58,7 +59,7 @@ export function BulkChargeForm({ peladaId, members }: { peladaId: string; member
           </select>
         </Field>
       </div>
-      <Field label="Vencimento"><input name="due_date" type="date" lang="pt-BR" /></Field>
+      <Field label="Vencimento"><DateInput name="due_date" /></Field>
       <Field label="Valor"><input name="amount" type="number" min="0.01" step="0.01" required /></Field>
       <Field label="Pix"><textarea name="pix_code" rows={2} placeholder="Chave Pix ou código copia e cola" /></Field>
 

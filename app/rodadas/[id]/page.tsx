@@ -1,6 +1,7 @@
 import { CalendarCog, Shield, Trophy } from "lucide-react";
 import { upsertRoundAction } from "@/app/actions";
 import { ActionStateForm } from "@/components/action-state-form";
+import { DateInput } from "@/components/date-input";
 import { MatchRegistration } from "@/components/match-registration";
 import { MyPresenceCard, PresenceAwareDrawBoard, PresenceListCard, RoundPresenceProvider } from "@/components/round-presence";
 import { BackLink, Card, CardTitle, Field, PageHeader } from "@/components/ui";
@@ -128,7 +129,7 @@ export default async function RoundDetailsPage({ params }: { params: Promise<{ i
               <ActionStateForm action={editAction} submitLabel="Salvar" className="mt-4 space-y-4">
                 <input type="hidden" name="pelada_id" value={round.pelada_id} />
                 <Field label="Título"><input name="title" defaultValue={round.title ?? ""} /></Field>
-                <Field label="Data"><input name="round_date" type="date" lang="pt-BR" required defaultValue={round.round_date} /></Field>
+                <Field label="Data"><DateInput name="round_date" required defaultValue={round.round_date} /></Field>
                 <Field label="Início"><input name="starts_at" type="time" required defaultValue={round.starts_at.slice(0, 5)} /></Field>
                 <Field label="Local"><input name="venue" defaultValue={round.venue ?? round.peladas?.venue ?? ""} /></Field>
                 <Field label="Limite"><input name="player_limit" type="number" min="1" defaultValue={round.player_limit ?? ""} /></Field>

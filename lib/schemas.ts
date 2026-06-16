@@ -135,7 +135,30 @@ export const roundSchema = z.object({
   venue: optionalText,
   player_limit: z.coerce.number().int("Informe um número inteiro").positive("Informe um limite maior que zero").optional().or(z.literal("").transform(() => undefined)),
   notes: optionalText,
-  status: z.enum(["scheduled", "finished", "cancelled"]).default("scheduled")
+  status: z.enum(["scheduled", "finished", "cancelled"]).default("scheduled"),
+  recurrence_enabled: z.preprocess((value) => value === "on" || value === "true" || value === true, z.boolean()).default(false),
+  recurrence_interval: z.coerce.number().int("Informe um número inteiro").min(1, "Informe um intervalo maior que zero").max(52, "Informe um intervalo menor").default(1),
+  recurrence_unit: z.enum(["week", "month"]).default("week"),
+  recurrence_weekdays: z.array(z.string()).optional().or(z.string().transform((value) => value ? [value] : [])),
+  recurrence_end_type: z.enum(["never", "on", "after"]).default("never"),
+  recurrence_until: optionalText,
+  recurrence_count: z.coerce.number().int("Informe um número inteiro").min(1, "Informe ao menos 1 ocorrência").max(52, "Crie no máximo 52 ocorrências").default(13)
+}).superRefine((value, ctx) => {
+  if (!value.recurrence_enabled) return;
+  if (value.recurrence_unit === "week" && !value.recurrence_weekdays?.length) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["recurrence_weekdays"],
+      message: "Selecione ao menos um dia da semana."
+    });
+  }
+  if (value.recurrence_end_type === "on" && !value.recurrence_until) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["recurrence_until"],
+      message: "Informe a data final da recorrência."
+    });
+  }
 });
 
 export const presenceSchema = z.object({

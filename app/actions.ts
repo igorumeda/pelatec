@@ -419,38 +419,116 @@ export async function updateMemberRoleFormAction(formData: FormData) {
   await updateMemberRoleAction(null, formData);
 }
 
+const recurrenceFields = [
+  "recurrence_enabled",
+  "recurrence_interval",
+  "recurrence_unit",
+  "recurrence_weekdays",
+  "recurrence_end_type",
+  "recurrence_until",
+  "recurrence_count"
+] as const;
+
+function roundPayload(input: ReturnType<typeof roundSchema.parse>) {
+  const payload = { ...input };
+  for (const field of recurrenceFields) {
+    delete payload[field];
+  }
+  return payload;
+}
+
+function localDateFromIso(value: string) {
+  const [year, month, day] = value.split("-").map(Number);
+  return new Date(year, month - 1, day);
+}
+
+function isoFromLocalDate(date: Date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function addMonths(date: Date, months: number) {
+  const next = new Date(date);
+  const day = next.getDate();
+  next.setMonth(next.getMonth() + months);
+  if (next.getDate() !== day) next.setDate(0);
+  return next;
+}
+
+function recurrenceDates(input: ReturnType<typeof roundSchema.parse>) {
+  if (!input.recurrence_enabled) return [input.round_date];
+
+  const start = localDateFromIso(input.round_date);
+  const until = input.recurrence_end_type === "on" && input.recurrence_until
+    ? localDateFromIso(input.recurrence_until)
+    : null;
+  const maxOccurrences = input.recurrence_end_type === "after" ? input.recurrence_count : 52;
+  const dates: string[] = [];
+
+  if (input.recurrence_unit === "month") {
+    for (let index = 0; dates.length < maxOccurrences && index < 52; index += input.recurrence_interval) {
+      const next = addMonths(start, index);
+      if (until && next > until) break;
+      dates.push(isoFromLocalDate(next));
+      if (input.recurrence_end_type === "never" && dates.length >= 13) break;
+    }
+    return dates;
+  }
+
+  const selectedWeekdays = new Set((input.recurrence_weekdays ?? []).map(Number));
+  const cursor = new Date(start);
+  const maxDays = 7 * input.recurrence_interval * 52;
+
+  for (let dayOffset = 0; dayOffset <= maxDays && dates.length < maxOccurrences; dayOffset += 1) {
+    const weekDistance = Math.floor(dayOffset / 7);
+    const sameInterval = weekDistance % input.recurrence_interval === 0;
+    if (sameInterval && selectedWeekdays.has(cursor.getDay())) {
+      if (until && cursor > until) break;
+      dates.push(isoFromLocalDate(cursor));
+      if (input.recurrence_end_type === "never" && dates.length >= 13) break;
+    }
+    cursor.setDate(cursor.getDate() + 1);
+  }
+
+  return dates;
+}
+
 export async function upsertRoundAction(roundId: string | null, _: unknown, formData: FormData) {
   const user = await requireUser();
   const supabase = await createClient();
   try {
     const input = roundSchema.parse(values(formData));
+    const payload = roundPayload(input);
     if (roundId) {
-      const { error } = await supabase.from("rounds").update(input).eq("id", roundId);
+      const { error } = await supabase.from("rounds").update(payload).eq("id", roundId);
       if (error) throw error;
     } else {
-      const { data: round, error } = await supabase
+      const dates = recurrenceDates(input);
+      const { data: createdRounds, error } = await supabase
         .from("rounds")
-        .insert({ ...input, created_by: user.id })
+        .insert(dates.map((roundDate) => ({ ...payload, round_date: roundDate, created_by: user.id })))
         .select("id")
-        .single();
+        .order("round_date", { ascending: true });
       if (error) throw error;
       const { data: members } = await supabase
         .from("pelada_members")
         .select("user_id")
         .eq("pelada_id", input.pelada_id);
-      if (members?.length) {
+      if (members?.length && createdRounds?.length) {
         await supabase.from("round_presence").insert(
-          members.map((member) => ({
+          createdRounds.flatMap((round) => members.map((member) => ({
             round_id: round.id,
             user_id: member.user_id,
             status: "pending",
             marked_by: user.id
-          }))
+          })))
         );
       }
     }
     revalidatePath(`/peladas/${input.pelada_id}/rodadas`);
-    return { ok: true, message: "Rodada salva" };
+    return { ok: true, message: input.recurrence_enabled && !roundId ? "Rodadas criadas" : "Rodada salva" };
   } catch (error) {
     return actionError(error);
   }

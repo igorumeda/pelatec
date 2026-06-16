@@ -2,6 +2,7 @@
 
 import { useActionState } from "react";
 import { submitPlayerPaymentAction } from "@/app/actions";
+import { DateInput, todayIsoDate } from "@/components/date-input";
 import { Button, Field } from "@/components/ui";
 
 export function ChargePaymentForm({ chargeId, amount }: { chargeId: string; amount: string | number }) {
@@ -12,7 +13,7 @@ export function ChargePaymentForm({ chargeId, amount }: { chargeId: string; amou
       <input type="hidden" name="charge_id" value={chargeId} />
       <div className="grid gap-3 sm:grid-cols-2">
         <Field label="Data">
-          <input name="paid_at" type="date" lang="pt-BR" required defaultValue={new Date().toISOString().slice(0, 10)} />
+          <DateInput name="paid_at" required defaultValue={todayIsoDate()} />
         </Field>
         <Field label="Valor">
           <input name="amount" type="number" min="0.01" step="0.01" required defaultValue={amount} />

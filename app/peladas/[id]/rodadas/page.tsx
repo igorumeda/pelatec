@@ -2,7 +2,8 @@ import Link from "next/link";
 import { CalendarDays, CalendarPlus2 } from "lucide-react";
 import { upsertRoundAction } from "@/app/actions";
 import { ActionStateForm } from "@/components/action-state-form";
-import { BackLink, Card, CardTitle, EmptyState, Field, PageHeader } from "@/components/ui";
+import { RoundFormFields } from "@/components/round-form-fields";
+import { BackLink, Card, CardTitle, EmptyState, PageHeader } from "@/components/ui";
 import { canManage, getMyRole, requireUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { dateLabel, roundStatusLabel } from "@/lib/utils";
@@ -48,12 +49,10 @@ export default async function RoundsPage({ params }: { params: Promise<{ id: str
             <CardTitle icon={CalendarPlus2}>Criar rodada</CardTitle>
             <ActionStateForm action={action} submitLabel="Criar" className="mt-4 space-y-4">
               <input type="hidden" name="pelada_id" value={id} />
-              <Field label="Título"><input name="title" placeholder="Rodada de quinta" /></Field>
-              <Field label="Data"><input name="round_date" type="date" lang="pt-BR" required /></Field>
-              <Field label="Início"><input name="starts_at" type="time" required defaultValue={pelada?.default_time?.slice(0, 5) ?? ""} /></Field>
-              <Field label="Local"><input name="venue" defaultValue={pelada?.venue_address ?? pelada?.venue ?? ""} /></Field>
-              <Field label="Limite de jogadores"><input name="player_limit" type="number" min="1" /></Field>
-              <Field label="Observações"><textarea name="notes" rows={3} /></Field>
+              <RoundFormFields
+                defaultTime={pelada?.default_time}
+                defaultVenue={pelada?.venue_address ?? pelada?.venue ?? ""}
+              />
               <input type="hidden" name="status" value="scheduled" />
             </ActionStateForm>
           </Card>
