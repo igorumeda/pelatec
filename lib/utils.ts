@@ -91,8 +91,12 @@ export function totalSkillPoints(skills: {
 
 export function roundStatusLabel(value: string | null | undefined) {
   switch (value) {
+    case "active":
+      return "Ativa";
     case "scheduled":
       return "Agendada";
+    case "in_progress":
+      return "Em andamento";
     case "finished":
       return "Encerrada";
     case "cancelled":
@@ -100,6 +104,25 @@ export function roundStatusLabel(value: string | null | undefined) {
     default:
       return value ?? "-";
   }
+}
+
+export type RoundOperationalStatus = "scheduled" | "in_progress" | "finished" | "cancelled";
+
+export function getRoundOperationalStatus(round: {
+  round_date: string;
+  starts_at: string;
+  duration_minutes?: number | string | null;
+  status?: string | null;
+}, now = new Date()): RoundOperationalStatus {
+  if (round.status === "cancelled") return "cancelled";
+
+  const startsAt = new Date(`${round.round_date}T${String(round.starts_at).slice(0, 8)}`);
+  const durationMinutes = Math.max(1, Number(round.duration_minutes ?? 120));
+  const endsAt = new Date(startsAt.getTime() + durationMinutes * 60 * 1000);
+
+  if (now < startsAt) return "scheduled";
+  if (now <= endsAt) return "in_progress";
+  return "finished";
 }
 
 export function chargeStatusLabel(value: string | null | undefined) {

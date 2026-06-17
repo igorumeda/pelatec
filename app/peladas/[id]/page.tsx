@@ -15,7 +15,7 @@ import { PeladaQuickActionsMenu } from "@/components/pelada-quick-actions-menu";
 import { Card, CardTitle, EmptyState, LinkButton, PageHeader, Stat } from "@/components/ui";
 import { canManage, getMyRole, requireUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
-import { brl, competenceLabel, dateLabel, peladaStatusLabel, roundStatusLabel } from "@/lib/utils";
+import { brl, competenceLabel, dateLabel, getRoundOperationalStatus, peladaStatusLabel, roundStatusLabel } from "@/lib/utils";
 
 type PresenceStatus = "confirmed" | "declined" | "pending";
 
@@ -24,6 +24,7 @@ type RoundSummary = {
   title: string | null;
   round_date: string;
   starts_at: string;
+  duration_minutes: number | string | null;
   venue: string | null;
   player_limit: number | null;
   notes: string | null;
@@ -58,26 +59,27 @@ export default async function PeladaDetailsPage({ params }: { params: Promise<{ 
     supabase.from("pelada_members").select("user_id, profiles(name)").eq("pelada_id", id).order("created_at"),
     supabase
       .from("rounds")
-      .select("id, title, round_date, starts_at, venue, player_limit, notes, status")
+      .select("id, title, round_date, starts_at, duration_minutes, venue, player_limit, notes, status")
       .eq("pelada_id", id)
+      .eq("status", "active")
       .gte("round_date", todayKey)
       .order("round_date")
       .order("starts_at")
-      .limit(6),
+      .limit(20),
     supabase
       .from("rounds")
-      .select("id, title, round_date, starts_at, venue, player_limit, notes, status")
+      .select("id, title, round_date, starts_at, duration_minutes, venue, player_limit, notes, status")
       .eq("pelada_id", id)
-      .eq("status", "finished")
+      .eq("status", "active")
+      .lte("round_date", todayKey)
       .order("round_date", { ascending: false })
       .order("starts_at", { ascending: false })
-      .limit(1)
-      .maybeSingle(),
+      .limit(20),
     supabase
       .from("rounds")
-      .select("*", { count: "exact", head: true })
+      .select("id, round_date, starts_at, duration_minutes, status")
       .eq("pelada_id", id)
-      .eq("status", "finished")
+      .eq("status", "active")
       .gte("round_date", monthStart)
       .lt("round_date", nextMonthStart),
     supabase.from("financial_entries").select("type, amount, entry_date").eq("pelada_id", id),
@@ -95,8 +97,13 @@ export default async function PeladaDetailsPage({ params }: { params: Promise<{ 
 
   const pelada = peladaResult.data;
   const members = normalizeMembers(membersResult.data ?? []);
-  const futureRounds = (futureRoundsResult.data ?? []) as RoundSummary[];
-  const latestFinishedRound = latestRoundResult.data as RoundSummary | null;
+  const futureRounds = ((futureRoundsResult.data ?? []) as RoundSummary[])
+    .filter((round) => getRoundOperationalStatus(round) !== "finished")
+    .slice(0, 6);
+  const latestFinishedRound = ((latestRoundResult.data ?? []) as RoundSummary[])
+    .find((round) => getRoundOperationalStatus(round) === "finished") ?? null;
+  const finishedRoundsThisMonth = (monthlyFinishedRoundsResult.data ?? [])
+    .filter((round: any) => getRoundOperationalStatus(round) === "finished").length;
   const entries = entriesResult.data ?? [];
   const payments = paymentsResult.data ?? [];
   const pendingCharges = openChargesResult.data ?? [];
@@ -187,7 +194,7 @@ export default async function PeladaDetailsPage({ params }: { params: Promise<{ 
             <Stat label="Saldo atual" value={brl(currentBalance)} description="Lançamentos mais pagamentos aprovados" />
           </>
         ) : (
-          <Stat label="Rodadas no mês" value={monthlyFinishedRoundsResult.count ?? 0} description="Rodadas encerradas neste mês" />
+          <Stat label="Rodadas no mês" value={finishedRoundsThisMonth} description="Rodadas encerradas neste mês" />
         )}
       </div>
 
@@ -205,7 +212,7 @@ export default async function PeladaDetailsPage({ params }: { params: Promise<{ 
                         {dateLabel(nextRound.round_date)} às {nextRound.starts_at.slice(0, 5)}
                       </p>
                       <div className="mt-3 flex flex-wrap gap-2 text-xs text-slate-600">
-                        <Chip>{roundStatusLabel(nextRound.status)}</Chip>
+                        <Chip>{roundStatusLabel(getRoundOperationalStatus(nextRound))}</Chip>
                         <Chip>{nextRound.venue ?? peladaVenueLabel ?? "Local não informado"}</Chip>
                         <Chip>{nextRoundPresence.confirmed} confirmados</Chip>
                         <Chip>{nextRoundPresence.pending} pendentes</Chip>
@@ -228,7 +235,7 @@ export default async function PeladaDetailsPage({ params }: { params: Promise<{ 
                           <div className="flex items-center justify-between gap-3">
                             <p className="font-medium text-slate-900">{round.title ?? "Rodada"}</p>
                             <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold uppercase text-slate-600">
-                              {roundStatusLabel(round.status)}
+                              {roundStatusLabel(getRoundOperationalStatus(round))}
                             </span>
                           </div>
                           <p className="mt-1 text-sm text-slate-600">

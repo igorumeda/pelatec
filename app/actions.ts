@@ -32,6 +32,7 @@ import {
   verifySignupCodeSchema
 } from "@/lib/schemas";
 import { createClient } from "@/lib/supabase/server";
+import { getRoundOperationalStatus } from "@/lib/utils";
 
 function values(formData: FormData) {
   return Object.fromEntries(formData.entries());
@@ -464,22 +465,21 @@ function recurrenceDates(input: ReturnType<typeof roundSchema.parse>) {
   const until = input.recurrence_end_type === "on" && input.recurrence_until
     ? localDateFromIso(input.recurrence_until)
     : null;
-  const maxOccurrences = input.recurrence_end_type === "after" ? input.recurrence_count : 52;
+  const maxOccurrences = input.recurrence_end_type === "after" ? input.recurrence_count : 99;
   const dates: string[] = [];
 
   if (input.recurrence_unit === "month") {
-    for (let index = 0; dates.length < maxOccurrences && index < 52; index += input.recurrence_interval) {
+    for (let index = 0; dates.length < maxOccurrences && index < 120; index += input.recurrence_interval) {
       const next = addMonths(start, index);
       if (until && next > until) break;
       dates.push(isoFromLocalDate(next));
-      if (input.recurrence_end_type === "never" && dates.length >= 13) break;
     }
     return dates;
   }
 
   const selectedWeekdays = new Set((input.recurrence_weekdays ?? []).map(Number));
   const cursor = new Date(start);
-  const maxDays = 7 * input.recurrence_interval * 52;
+  const maxDays = 366;
 
   for (let dayOffset = 0; dayOffset <= maxDays && dates.length < maxOccurrences; dayOffset += 1) {
     const weekDistance = Math.floor(dayOffset / 7);
@@ -487,12 +487,52 @@ function recurrenceDates(input: ReturnType<typeof roundSchema.parse>) {
     if (sameInterval && selectedWeekdays.has(cursor.getDay())) {
       if (until && cursor > until) break;
       dates.push(isoFromLocalDate(cursor));
-      if (input.recurrence_end_type === "never" && dates.length >= 13) break;
     }
     cursor.setDate(cursor.getDate() + 1);
   }
 
   return dates;
+}
+
+function formatDatePt(value: string) {
+  const [year, month, day] = value.split("-");
+  return `${day}/${month}/${year}`;
+}
+
+async function ensureRoundScheduleIsAvailable({
+  supabase,
+  peladaId,
+  dates,
+  startsAt,
+  ignoreRoundId
+}: {
+  supabase: Awaited<ReturnType<typeof createClient>>;
+  peladaId: string;
+  dates: string[];
+  startsAt: string;
+  ignoreRoundId?: string | null;
+}) {
+  const uniqueDates = Array.from(new Set(dates));
+  if (!uniqueDates.length) return;
+
+  let query = supabase
+    .from("rounds")
+    .select("id, round_date, starts_at")
+    .eq("pelada_id", peladaId)
+    .eq("starts_at", startsAt)
+    .in("round_date", uniqueDates)
+    .limit(1);
+
+  if (ignoreRoundId) {
+    query = query.neq("id", ignoreRoundId);
+  }
+
+  const { data, error } = await query;
+  if (error) throw error;
+  const conflict = data?.[0];
+  if (conflict) {
+    throw new Error(`Já existe uma rodada cadastrada em ${formatDatePt(conflict.round_date)} às ${String(conflict.starts_at).slice(0, 5)}.`);
+  }
 }
 
 export async function upsertRoundAction(roundId: string | null, _: unknown, formData: FormData) {
@@ -502,15 +542,27 @@ export async function upsertRoundAction(roundId: string | null, _: unknown, form
     const input = roundSchema.parse(values(formData));
     const payload = roundPayload(input);
     if (roundId) {
+      await ensureRoundScheduleIsAvailable({
+        supabase,
+        peladaId: input.pelada_id,
+        dates: [input.round_date],
+        startsAt: input.starts_at,
+        ignoreRoundId: roundId
+      });
       const { error } = await supabase.from("rounds").update(payload).eq("id", roundId);
       if (error) throw error;
     } else {
       const dates = recurrenceDates(input);
+      await ensureRoundScheduleIsAvailable({
+        supabase,
+        peladaId: input.pelada_id,
+        dates,
+        startsAt: input.starts_at
+      });
       const { data: createdRounds, error } = await supabase
         .from("rounds")
         .insert(dates.map((roundDate) => ({ ...payload, round_date: roundDate, created_by: user.id })))
-        .select("id")
-        .order("round_date", { ascending: true });
+        .select("id");
       if (error) throw error;
       const { data: members } = await supabase
         .from("pelada_members")
@@ -529,6 +581,57 @@ export async function upsertRoundAction(roundId: string | null, _: unknown, form
     }
     revalidatePath(`/peladas/${input.pelada_id}/rodadas`);
     return { ok: true, message: input.recurrence_enabled && !roundId ? "Rodadas criadas" : "Rodada salva" };
+  } catch (error) {
+    return actionError(error);
+  }
+}
+
+export async function deleteScheduledRoundsAction(formData: FormData) {
+  const user = await requireUser();
+  const supabase = await createClient();
+
+  try {
+    const peladaId = z.string().uuid("Pelada inválida").parse(formData.get("pelada_id"));
+    const roundIds = z.array(z.string().uuid("Rodada inválida")).min(1, "Selecione ao menos uma rodada.")
+      .parse(formData.getAll("round_ids").map(String));
+
+    const { data: membership, error: membershipError } = await supabase
+      .from("pelada_members")
+      .select("role")
+      .eq("pelada_id", peladaId)
+      .eq("user_id", user.id)
+      .maybeSingle();
+
+    if (membershipError) throw membershipError;
+    if (membership?.role !== "owner" && membership?.role !== "admin") {
+      throw new Error("Você não tem permissão para remover rodadas.");
+    }
+
+    const { data: selectedRounds, error: selectedRoundsError } = await supabase
+      .from("rounds")
+      .select("id, round_date, starts_at, duration_minutes, status")
+      .eq("pelada_id", peladaId)
+      .in("id", roundIds);
+
+    if (selectedRoundsError) throw selectedRoundsError;
+    if (!selectedRounds?.length) throw new Error("Nenhuma rodada encontrada.");
+
+    const invalidRounds = selectedRounds.filter((round) => getRoundOperationalStatus(round) !== "scheduled");
+    if (invalidRounds.length) {
+      throw new Error("Apenas rodadas agendadas podem ser removidas por esta ação.");
+    }
+
+    const { error } = await supabase
+      .from("rounds")
+      .delete()
+      .eq("pelada_id", peladaId)
+      .in("id", roundIds)
+      .eq("status", "active");
+
+    if (error) throw error;
+    revalidatePath(`/peladas/${peladaId}/rodadas`);
+    revalidatePath(`/peladas/${peladaId}`);
+    return { ok: true, message: `${selectedRounds.length} rodada(s) removida(s).` };
   } catch (error) {
     return actionError(error);
   }

@@ -8,6 +8,11 @@ const optionalLongitude = z.coerce.number().min(-180).max(180).optional().or(z.l
 const optionalInteger = (min: number, max: number, message: string) =>
   z.coerce.number().int(message).min(min, message).max(max, message).optional().or(z.literal("").transform(() => undefined));
 
+function localDateFromIso(value: string) {
+  const [year, month, day] = value.split("-").map(Number);
+  return new Date(year, month - 1, day);
+}
+
 const reservedUsernames = new Set([
   "login",
   "signup",
@@ -132,17 +137,18 @@ export const roundSchema = z.object({
   title: optionalText,
   round_date: z.string().min(1, "Informe a data"),
   starts_at: z.string().min(1, "Informe o horário"),
+  duration_minutes: z.coerce.number().int("Informe um número inteiro").min(1, "Informe uma duração maior que zero").max(1440, "Informe uma duração de até 24 horas").default(120),
   venue: optionalText,
   player_limit: z.coerce.number().int("Informe um número inteiro").positive("Informe um limite maior que zero").optional().or(z.literal("").transform(() => undefined)),
   notes: optionalText,
-  status: z.enum(["scheduled", "finished", "cancelled"]).default("scheduled"),
+  status: z.enum(["active", "cancelled"]).default("active"),
   recurrence_enabled: z.preprocess((value) => value === "on" || value === "true" || value === true, z.boolean()).default(false),
   recurrence_interval: z.coerce.number().int("Informe um número inteiro").min(1, "Informe um intervalo maior que zero").max(52, "Informe um intervalo menor").default(1),
   recurrence_unit: z.enum(["week", "month"]).default("week"),
   recurrence_weekdays: z.array(z.string()).optional().or(z.string().transform((value) => value ? [value] : [])),
-  recurrence_end_type: z.enum(["never", "on", "after"]).default("never"),
+  recurrence_end_type: z.enum(["on", "after"]).default("on"),
   recurrence_until: optionalText,
-  recurrence_count: z.coerce.number().int("Informe um número inteiro").min(1, "Informe ao menos 1 ocorrência").max(52, "Crie no máximo 52 ocorrências").default(13)
+  recurrence_count: z.coerce.number().int("Informe um número inteiro").min(1, "Informe ao menos 1 ocorrência").max(99, "Crie no máximo 99 rodadas").default(13)
 }).superRefine((value, ctx) => {
   if (!value.recurrence_enabled) return;
   if (value.recurrence_unit === "week" && !value.recurrence_weekdays?.length) {
@@ -158,6 +164,20 @@ export const roundSchema = z.object({
       path: ["recurrence_until"],
       message: "Informe a data final da recorrência."
     });
+  }
+  if (value.recurrence_end_type === "on" && value.recurrence_until) {
+    const start = localDateFromIso(value.round_date);
+    const until = localDateFromIso(value.recurrence_until);
+    const maxUntil = new Date(start);
+    maxUntil.setFullYear(maxUntil.getFullYear() + 1);
+
+    if (until > maxUntil) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["recurrence_until"],
+        message: "A data final deve estar no máximo 1 ano após a data da rodada."
+      });
+    }
   }
 });
 

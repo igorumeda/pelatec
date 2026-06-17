@@ -31,7 +31,7 @@ export function RoundFormFields({ defaultDate = "", defaultTime, defaultVenue }:
     if (!defaultDate) return [String(new Date().getDay())];
     return [String(localDateFromIso(defaultDate).getDay())];
   });
-  const [endType, setEndType] = useState<"never" | "on" | "after">("never");
+  const [endType, setEndType] = useState<"on" | "after">("on");
 
   const recurrenceSummary = useMemo(() => {
     if (!recurrenceEnabled) return "Sem recorrência";
@@ -61,6 +61,7 @@ export function RoundFormFields({ defaultDate = "", defaultTime, defaultVenue }:
       <Field label="Título"><input name="title" placeholder="Rodada de quinta" /></Field>
       <Field label="Data"><DateInput name="round_date" required value={roundDate} onChange={handleRoundDateChange} /></Field>
       <Field label="Início"><input name="starts_at" type="time" required defaultValue={defaultTime?.slice(0, 5) ?? ""} /></Field>
+      <Field label="Duração em minutos"><input name="duration_minutes" type="number" min="1" max="1440" defaultValue={120} /></Field>
       <Field label="Local"><input name="venue" defaultValue={defaultVenue ?? ""} /></Field>
       <Field label="Limite de jogadores"><input name="player_limit" type="number" min="1" /></Field>
       <Field label="Observações"><textarea name="notes" rows={3} /></Field>
@@ -77,7 +78,7 @@ export function RoundFormFields({ defaultDate = "", defaultTime, defaultVenue }:
           <span>
             <span className="flex items-center gap-2 font-semibold text-slate-900">
               <Repeat2 size={16} />
-              Recorrência personalizada
+              Recorrência
             </span>
             <span className="mt-1 block text-sm text-slate-600">{recurrenceSummary}</span>
           </span>
@@ -135,16 +136,13 @@ export function RoundFormFields({ defaultDate = "", defaultTime, defaultVenue }:
 
             <div className="space-y-3">
               <p className="text-sm font-medium text-slate-700">Termina em</p>
-              <label className="flex items-center gap-3 text-sm text-slate-700">
-                <input type="radio" name="recurrence_end_type" value="never" checked={endType === "never"} onChange={() => setEndType("never")} className="h-4 w-4" />
-                Nunca
-              </label>
               <label className="grid gap-3 text-sm text-slate-700 sm:grid-cols-[auto,1fr] sm:items-center">
                 <span className="flex items-center gap-3">
                   <input type="radio" name="recurrence_end_type" value="on" checked={endType === "on"} onChange={() => setEndType("on")} className="h-4 w-4" />
                   Em
                 </span>
-                <DateInput name="recurrence_until" disabled={endType !== "on"} />
+                <DateInput name="recurrence_until" disabled={endType !== "on"} value={defaultRecurrenceUntil(roundDate)} />
+                <span className="text-xs text-slate-600 sm:col-start-2">No máximo 1 ano após a data da rodada.</span>
               </label>
               <label className="grid gap-3 text-sm text-slate-700 sm:grid-cols-[auto,1fr] sm:items-center">
                 <span className="flex items-center gap-3">
@@ -152,9 +150,10 @@ export function RoundFormFields({ defaultDate = "", defaultTime, defaultVenue }:
                   Após
                 </span>
                 <div className="flex items-center gap-2">
-                  <input name="recurrence_count" type="number" min={1} max={52} defaultValue={13} disabled={endType !== "after"} />
-                  <span className="text-sm text-slate-600">ocorrências</span>
+                  <input name="recurrence_count" type="number" min={1} max={99} defaultValue={13} disabled={endType !== "after"} />
+                  <span className="text-sm text-slate-600">rodadas</span>
                 </div>
+                <span className="text-xs text-slate-600 sm:col-start-2">Informe no máximo 99 rodadas.</span>
               </label>
             </div>
           </div>
@@ -167,4 +166,11 @@ export function RoundFormFields({ defaultDate = "", defaultTime, defaultVenue }:
 function localDateFromIso(value: string) {
   const [year, month, day] = value.split("-").map(Number);
   return new Date(year, month - 1, day);
+}
+
+function defaultRecurrenceUntil(roundDate: string) {
+  if (!roundDate) return "";
+  const date = localDateFromIso(roundDate);
+  date.setMonth(date.getMonth() + 3);
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
 }

@@ -7,7 +7,7 @@ import { MyPresenceCard, PresenceAwareDrawBoard, PresenceListCard, RoundPresence
 import { BackLink, Card, CardTitle, Field, PageHeader } from "@/components/ui";
 import { canManage, getMyRole, requireUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
-import { dateLabel } from "@/lib/utils";
+import { dateLabel, getRoundOperationalStatus, roundStatusLabel } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -64,6 +64,7 @@ export default async function RoundDetailsPage({ params }: { params: Promise<{ i
     }))
   }));
   const editAction = upsertRoundAction.bind(null, id);
+  const operationalStatus = round ? getRoundOperationalStatus(round) : null;
 
   const presenceMembers = memberPresence.map((row) => ({
     user_id: row.user_id,
@@ -79,7 +80,7 @@ export default async function RoundDetailsPage({ params }: { params: Promise<{ i
       </div>
       <PageHeader
         title={round?.title ?? "Rodada"}
-        description={round ? `${round.peladas?.name} - ${dateLabel(round.round_date)} as ${round.starts_at.slice(0, 5)}` : undefined}
+        description={round ? `${round.peladas?.name} - ${dateLabel(round.round_date)} as ${round.starts_at.slice(0, 5)} - ${roundStatusLabel(operationalStatus)}` : undefined}
         theme="dark"
       />
 
@@ -131,12 +132,12 @@ export default async function RoundDetailsPage({ params }: { params: Promise<{ i
                 <Field label="Título"><input name="title" defaultValue={round.title ?? ""} /></Field>
                 <Field label="Data"><DateInput name="round_date" required defaultValue={round.round_date} /></Field>
                 <Field label="Início"><input name="starts_at" type="time" required defaultValue={round.starts_at.slice(0, 5)} /></Field>
+                <Field label="Duração em minutos"><input name="duration_minutes" type="number" min="1" max="1440" defaultValue={round.duration_minutes ?? 120} /></Field>
                 <Field label="Local"><input name="venue" defaultValue={round.venue ?? round.peladas?.venue ?? ""} /></Field>
                 <Field label="Limite"><input name="player_limit" type="number" min="1" defaultValue={round.player_limit ?? ""} /></Field>
                 <Field label="Status">
                   <select name="status" defaultValue={round.status}>
-                    <option value="scheduled">Agendada</option>
-                    <option value="finished">Encerrada</option>
+                    <option value="active">Ativa</option>
                     <option value="cancelled">Cancelada</option>
                   </select>
                 </Field>

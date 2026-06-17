@@ -1,7 +1,7 @@
 export type MemberRole = "owner" | "admin" | "player";
 export type MemberType = "monthly" | "daily";
 export type PeladaStatus = "active" | "inactive";
-export type RoundStatus = "scheduled" | "finished" | "cancelled";
+export type RoundStatus = "active" | "cancelled";
 export type PresenceStatus = "confirmed" | "declined" | "pending";
 export type FinancialEntryType = "revenue" | "expense";
 export type ChargeStatus = "open" | "paid" | "cancelled";
@@ -74,6 +74,7 @@ export type Round = {
   title: string | null;
   round_date: string;
   starts_at: string;
+  duration_minutes: number;
   venue: string | null;
   player_limit: number | null;
   notes: string | null;

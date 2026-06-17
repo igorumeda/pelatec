@@ -1,12 +1,12 @@
-import Link from "next/link";
 import { CalendarDays, CalendarPlus2 } from "lucide-react";
 import { upsertRoundAction } from "@/app/actions";
 import { ActionStateForm } from "@/components/action-state-form";
 import { RoundFormFields } from "@/components/round-form-fields";
-import { BackLink, Card, CardTitle, EmptyState, PageHeader } from "@/components/ui";
+import { RoundsListManager, type ManagedRound } from "@/components/rounds-list-manager";
+import { BackLink, Card, CardTitle, PageHeader } from "@/components/ui";
 import { canManage, getMyRole, requireUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
-import { dateLabel, roundStatusLabel } from "@/lib/utils";
+import { getRoundOperationalStatus } from "@/lib/utils";
 
 export default async function RoundsPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -19,6 +19,33 @@ export default async function RoundsPage({ params }: { params: Promise<{ id: str
     .select("*")
     .eq("pelada_id", id)
     .order("round_date", { ascending: false });
+  const roundIds = rounds?.map((round: any) => round.id) ?? [];
+  const { data: confirmedPresence } = roundIds.length
+    ? await supabase
+      .from("round_presence")
+      .select("round_id")
+      .in("round_id", roundIds)
+      .eq("status", "confirmed")
+    : { data: [] };
+  const { data: roundMatches } = roundIds.length
+    ? await supabase
+      .from("round_matches")
+      .select("round_id")
+      .in("round_id", roundIds)
+    : { data: [] };
+  const confirmedCountByRound = countByRoundId(confirmedPresence ?? []);
+  const matchCountByRound = countByRoundId(roundMatches ?? []);
+  const managedRounds = (rounds ?? []).map((round: any) => ({
+    id: round.id,
+    title: round.title,
+    round_date: round.round_date,
+    starts_at: round.starts_at,
+    duration_minutes: round.duration_minutes,
+    status: round.status,
+    operationalStatus: getRoundOperationalStatus(round),
+    confirmedCount: confirmedCountByRound.get(round.id) ?? 0,
+    matchCount: matchCountByRound.get(round.id) ?? 0
+  })) satisfies ManagedRound[];
   const action = upsertRoundAction.bind(null, null);
 
   return (
@@ -30,18 +57,7 @@ export default async function RoundsPage({ params }: { params: Promise<{ id: str
       <div className="grid gap-6 lg:grid-cols-[1fr_380px]">
         <Card>
           <CardTitle icon={CalendarDays}>Rodadas cadastradas</CardTitle>
-          {!rounds?.length ? <EmptyState title="Nenhuma rodada criada" /> : null}
-          <div className="mt-4 space-y-3">
-            {rounds?.map((round: any) => (
-              <Link key={round.id} href={`/rodadas/${round.id}`} className="block rounded-2xl border border-slate-200 p-4 hover:bg-slate-50">
-                <div className="flex items-center justify-between gap-3">
-                  <p className="font-medium text-slate-900">{round.title ?? "Rodada"}</p>
-                  <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold uppercase text-slate-700">{roundStatusLabel(round.status)}</span>
-                </div>
-                <p className="mt-1 text-sm text-slate-600">{dateLabel(round.round_date)} às {round.starts_at.slice(0, 5)}</p>
-              </Link>
-            ))}
-          </div>
+          <RoundsListManager peladaId={id} rounds={managedRounds} canManage={canManage(role)} />
         </Card>
 
         {canManage(role) ? (
@@ -53,11 +69,17 @@ export default async function RoundsPage({ params }: { params: Promise<{ id: str
                 defaultTime={pelada?.default_time}
                 defaultVenue={pelada?.venue_address ?? pelada?.venue ?? ""}
               />
-              <input type="hidden" name="status" value="scheduled" />
+              <input type="hidden" name="status" value="active" />
             </ActionStateForm>
           </Card>
         ) : null}
       </div>
     </>
   );
+}
+
+function countByRoundId(rows: Array<{ round_id: string }>) {
+  const counts = new Map<string, number>();
+  rows.forEach((row) => counts.set(row.round_id, (counts.get(row.round_id) ?? 0) + 1));
+  return counts;
 }
