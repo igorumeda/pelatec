@@ -2,8 +2,9 @@
 
 import { useActionState } from "react";
 import { submitPlayerPaymentAction } from "@/app/actions";
-import { DateInput, todayIsoDate } from "@/components/date-input";
+import { DateInput } from "@/components/date-input";
 import { Button, Field } from "@/components/ui";
+import { todayIsoDate } from "@/lib/date";
 
 export function ChargePaymentForm({ chargeId, amount }: { chargeId: string; amount: string | number }) {
   const [state, action] = useActionState(submitPlayerPaymentAction, null);

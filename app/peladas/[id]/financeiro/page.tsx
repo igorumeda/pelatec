@@ -3,10 +3,11 @@ import { redirect } from "next/navigation";
 import { cancelChargeAction, cancelPaymentAction, createFinancialEntryAction, reviewPaymentFormAction } from "@/app/actions";
 import { ActionStateForm } from "@/components/action-state-form";
 import { BulkChargeForm } from "@/components/bulk-charge-form";
-import { DateInput, todayIsoDate } from "@/components/date-input";
+import { DateInput } from "@/components/date-input";
 import { FinanceTabs } from "@/components/finance-tabs";
 import { BackLink, Card, CardTitle, Field, PageHeader, Stat } from "@/components/ui";
 import { canManage, getMyRole, requireUser } from "@/lib/auth";
+import { todayIsoDate } from "@/lib/date";
 import { createClient } from "@/lib/supabase/server";
 import { brl, chargeStatusLabel, competenceLabel, dateLabel, memberTypeLabel } from "@/lib/utils";
 
