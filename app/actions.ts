@@ -10,9 +10,11 @@ import {
   bulkChargeSchema,
   cancelPaymentSchema,
   cancelChargeSchema,
+  cancelJoinRequestSchema,
   chargeSchema,
   drawSchema,
   financialEntrySchema,
+  joinRequestSchema,
   loginSchema,
   memberRoleSchema,
   memberSchema,
@@ -26,6 +28,7 @@ import {
   roundMatchSchema,
   roundMatchWithStatsSchema,
   roundSchema,
+  reviewJoinRequestSchema,
   reviewPaymentSchema,
   signupSchema,
   userLocationSchema,
@@ -418,6 +421,146 @@ export async function updateMemberRoleAction(_: unknown, formData: FormData) {
 
 export async function updateMemberRoleFormAction(formData: FormData) {
   await updateMemberRoleAction(null, formData);
+}
+
+export async function requestPeladaJoinAction(_: unknown, formData: FormData) {
+  const user = await requireUser();
+  const supabase = await createClient();
+
+  try {
+    const input = joinRequestSchema.parse(values(formData));
+
+    const { data: existingRequest, error: existingRequestError } = await supabase
+      .from("pelada_join_requests")
+      .select("id, status")
+      .eq("pelada_id", input.pelada_id)
+      .eq("user_id", user.id)
+      .maybeSingle();
+
+    if (existingRequestError) throw existingRequestError;
+    if (existingRequest?.status === "pending") {
+      return { ok: true, message: "Sua solicitação já está aguardando aprovação." };
+    }
+    if (existingRequest?.status === "approved") {
+      return { ok: true, message: "Sua solicitação já foi aprovada." };
+    }
+
+    const payload = {
+      pelada_id: input.pelada_id,
+      user_id: user.id,
+      message: input.message,
+      status: "pending",
+      reviewed_by: null,
+      reviewed_at: null
+    };
+
+    const { error } = existingRequest?.status === "rejected"
+      ? await supabase
+        .from("pelada_join_requests")
+        .update(payload)
+        .eq("id", existingRequest.id)
+      : await supabase
+        .from("pelada_join_requests")
+        .insert(payload);
+
+    if (error) throw error;
+
+    if (input.public_slug) revalidatePath(`/pelada/${input.public_slug}`);
+    revalidatePath(`/peladas/${input.pelada_id}`);
+    revalidateAppShell();
+    return { ok: true, message: "Solicitação enviada. O administrador da pelada será avisado." };
+  } catch (error) {
+    return actionError(error);
+  }
+}
+
+export async function cancelPeladaJoinRequestAction(_: unknown, formData: FormData) {
+  const user = await requireUser();
+  const supabase = await createClient();
+
+  try {
+    const input = cancelJoinRequestSchema.parse(values(formData));
+    const { error } = await supabase
+      .from("pelada_join_requests")
+      .delete()
+      .eq("pelada_id", input.pelada_id)
+      .eq("user_id", user.id)
+      .eq("status", "pending");
+
+    if (error) throw error;
+
+    if (input.public_slug) revalidatePath(`/pelada/${input.public_slug}`);
+    revalidatePath(`/peladas/${input.pelada_id}`);
+    revalidateAppShell();
+    if (input.public_slug) redirect(`/pelada/${input.public_slug}`);
+    return { ok: true, message: "" };
+  } catch (error) {
+    return actionError(error);
+  }
+}
+
+export async function reviewPeladaJoinRequestFormAction(formData: FormData) {
+  const user = await requireUser();
+  const supabase = await createClient();
+
+  try {
+    const input = reviewJoinRequestSchema.parse(values(formData));
+
+    const { data: membership, error: membershipError } = await supabase
+      .from("pelada_members")
+      .select("role")
+      .eq("pelada_id", input.pelada_id)
+      .eq("user_id", user.id)
+      .maybeSingle();
+
+    if (membershipError) throw membershipError;
+    if (membership?.role !== "owner" && membership?.role !== "admin") {
+      throw new Error("Você não tem permissão para responder solicitações.");
+    }
+
+    const { data: request, error: requestError } = await supabase
+      .from("pelada_join_requests")
+      .select("id, pelada_id, user_id, status, peladas(public_slug)")
+      .eq("id", input.request_id)
+      .eq("pelada_id", input.pelada_id)
+      .single();
+
+    if (requestError) throw requestError;
+    if (request.status !== "pending") throw new Error("Esta solicitação já foi respondida.");
+
+    if (input.status === "approved") {
+      const { error: memberError } = await supabase
+        .from("pelada_members")
+        .upsert({
+          pelada_id: input.pelada_id,
+          user_id: request.user_id,
+          role: "player",
+          member_type: input.member_type
+        }, { onConflict: "pelada_id,user_id" });
+
+      if (memberError) throw memberError;
+    }
+
+    const { error: updateError } = await supabase
+      .from("pelada_join_requests")
+      .update({
+        status: input.status,
+        reviewed_by: user.id,
+        reviewed_at: new Date().toISOString()
+      })
+      .eq("id", input.request_id);
+
+    if (updateError) throw updateError;
+
+    const relatedPelada = request.peladas as { public_slug?: string | null } | Array<{ public_slug?: string | null }> | null;
+    const publicSlug = Array.isArray(relatedPelada) ? relatedPelada[0]?.public_slug : relatedPelada?.public_slug;
+    revalidatePath(`/peladas/${input.pelada_id}`);
+    revalidatePath(`/peladas/${input.pelada_id}/membros`);
+    if (publicSlug) revalidatePath(`/pelada/${publicSlug}`);
+    revalidateAppShell();
+  } catch (error) {
+    throw new Error(actionError(error).message);
+  }
 }
 
 const recurrenceFields = [

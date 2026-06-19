@@ -4,12 +4,16 @@ import {
   Calendar,
   CalendarDays,
   CalendarPlus2,
+  Check,
   CircleDollarSign,
   Clock3,
   MapPin,
   ReceiptText,
-  UsersRound
+  UserPlus,
+  UsersRound,
+  X
 } from "lucide-react";
+import { reviewPeladaJoinRequestFormAction } from "@/app/actions";
 import { redirect } from "next/navigation";
 import { PeladaQuickActionsMenu } from "@/components/pelada-quick-actions-menu";
 import { Card, CardTitle, EmptyState, LinkButton, PageHeader, Stat } from "@/components/ui";
@@ -53,7 +57,8 @@ export default async function PeladaDetailsPage({ params }: { params: Promise<{ 
     entriesResult,
     paymentsResult,
     openChargesCountResult,
-    openChargesResult
+    openChargesResult,
+    joinRequestsResult
   ] = await Promise.all([
     supabase.from("peladas").select("*").eq("id", id).single(),
     supabase.from("pelada_members").select("user_id, profiles(name)").eq("pelada_id", id).order("created_at"),
@@ -92,7 +97,15 @@ export default async function PeladaDetailsPage({ params }: { params: Promise<{ 
       .eq("status", "open")
       .order("due_date", { ascending: true, nullsFirst: false })
       .order("created_at", { ascending: false })
-      .limit(5)
+      .limit(5),
+    manageable
+      ? supabase
+        .from("pelada_join_requests")
+        .select("id, user_id, message, created_at, profiles(name, email, avatar_url)")
+        .eq("pelada_id", id)
+        .eq("status", "pending")
+        .order("created_at", { ascending: true })
+      : Promise.resolve({ data: [] })
   ]);
 
   const pelada = peladaResult.data;
@@ -107,6 +120,7 @@ export default async function PeladaDetailsPage({ params }: { params: Promise<{ 
   const entries = entriesResult.data ?? [];
   const payments = paymentsResult.data ?? [];
   const pendingCharges = openChargesResult.data ?? [];
+  const joinRequests = joinRequestsResult.data ?? [];
   const pendingChargeCount = openChargesCountResult.count ?? 0;
 
   const trackedRoundIds = [...new Set([...futureRounds.map((round) => round.id), latestFinishedRound?.id].filter(Boolean))] as string[];
@@ -324,6 +338,41 @@ export default async function PeladaDetailsPage({ params }: { params: Promise<{ 
         <aside className="space-y-6">
           {manageable ? (
             <Card>
+              <CardTitle icon={UserPlus}>Solicitações de entrada</CardTitle>
+              <div className="mt-4 space-y-3">
+                {joinRequests.map((request: any) => {
+                  const profile = Array.isArray(request.profiles) ? request.profiles[0] : request.profiles;
+                  return (
+                    <div key={request.id} className="rounded-2xl border border-slate-200 p-3 text-sm">
+                      <div>
+                        <p className="font-semibold text-slate-900">{profile?.name ?? "Jogador"}</p>
+                        <p className="text-slate-600">{profile?.email ?? "E-mail não informado"}</p>
+                        {request.message ? <p className="mt-2 rounded-xl bg-slate-50 p-3 text-slate-700">{request.message}</p> : null}
+                      </div>
+                      <div className="mt-3 flex flex-wrap gap-2">
+                        <ReviewJoinRequestForm requestId={request.id} peladaId={id} status="approved" memberType="daily">
+                          <Check size={15} />
+                          Aceitar diarista
+                        </ReviewJoinRequestForm>
+                        <ReviewJoinRequestForm requestId={request.id} peladaId={id} status="approved" memberType="monthly">
+                          <Check size={15} />
+                          Aceitar mensalista
+                        </ReviewJoinRequestForm>
+                        <ReviewJoinRequestForm requestId={request.id} peladaId={id} status="rejected" memberType="daily" variant="danger">
+                          <X size={15} />
+                          Recusar
+                        </ReviewJoinRequestForm>
+                      </div>
+                    </div>
+                  );
+                })}
+                {!joinRequests.length ? <p className="text-sm text-slate-600">Nenhuma solicitação pendente.</p> : null}
+              </div>
+            </Card>
+          ) : null}
+
+          {manageable ? (
+            <Card>
               <CardTitle icon={CircleDollarSign}>Resumo financeiro do mês</CardTitle>
               <div className="mt-4 space-y-3">
                 {monthlyRevenue || monthlyExpenses || pendingChargeCount ? (
@@ -354,6 +403,40 @@ export default async function PeladaDetailsPage({ params }: { params: Promise<{ 
         </aside>
       </div>
     </>
+  );
+}
+
+function ReviewJoinRequestForm({
+  requestId,
+  peladaId,
+  status,
+  memberType,
+  variant = "default",
+  children
+}: {
+  requestId: string;
+  peladaId: string;
+  status: "approved" | "rejected";
+  memberType: "monthly" | "daily";
+  variant?: "default" | "danger";
+  children: React.ReactNode;
+}) {
+  return (
+    <form action={reviewPeladaJoinRequestFormAction}>
+      <input type="hidden" name="request_id" value={requestId} />
+      <input type="hidden" name="pelada_id" value={peladaId} />
+      <input type="hidden" name="status" value={status} />
+      <input type="hidden" name="member_type" value={memberType} />
+      <button
+        className={
+          variant === "danger"
+            ? "inline-flex items-center gap-1.5 rounded-xl border border-red-200 px-3 py-2 text-xs font-semibold text-red-700 hover:bg-red-50"
+            : "inline-flex items-center gap-1.5 rounded-xl border border-field-200 bg-field-50 px-3 py-2 text-xs font-semibold text-field-800 hover:bg-field-100"
+        }
+      >
+        {children}
+      </button>
+    </form>
   );
 }
 

@@ -132,6 +132,24 @@ export const memberRoleSchema = z.object({
   member_type: z.enum(["monthly", "daily"]).default("monthly")
 });
 
+export const joinRequestSchema = z.object({
+  pelada_id: z.string().uuid("Pelada inválida"),
+  public_slug: optionalSlug,
+  message: z.string().trim().max(280, "A mensagem pode ter no máximo 280 caracteres").optional().transform((v) => v || undefined)
+});
+
+export const cancelJoinRequestSchema = z.object({
+  pelada_id: z.string().uuid("Pelada inválida"),
+  public_slug: optionalSlug
+});
+
+export const reviewJoinRequestSchema = z.object({
+  request_id: z.string().uuid("Solicitação inválida"),
+  pelada_id: z.string().uuid("Pelada inválida"),
+  status: z.enum(["approved", "rejected"]),
+  member_type: z.enum(["monthly", "daily"]).default("daily")
+});
+
 export const roundSchema = z.object({
   pelada_id: z.string().uuid("Pelada inválida"),
   title: optionalText,

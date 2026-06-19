@@ -31,6 +31,7 @@ export type ExplorePelada = {
   scheduled_rounds_count: number | string;
   finished_rounds_count: number | string;
   average_player_quality: number | string | null;
+  viewer_status?: "member" | "requested" | null;
 };
 
 export type ExplorePlayer = {
@@ -534,6 +535,11 @@ function PeladaExploreCard({ pelada }: { pelada: ExplorePelada & { distanceKm: n
       <div className="relative min-h-56">
         <Image src={bannerSrc} alt={`Banner da pelada ${pelada.name}`} fill sizes="(min-width: 1024px) 50vw, 100vw" className="object-cover" />
         <div className="absolute inset-0 bg-gradient-to-t from-brand-950 via-brand-950/50 to-brand-950/10" />
+        {pelada.viewer_status ? (
+          <span className="absolute right-4 top-4 rounded-full border border-white/20 bg-brand-950/70 px-3 py-1.5 text-xs font-semibold text-slate-100 shadow-sm backdrop-blur">
+            {pelada.viewer_status === "member" ? "Você participa" : "Solicitação enviada"}
+          </span>
+        ) : null}
         <div className="absolute inset-x-0 bottom-0 p-5">
           <div className="flex items-end gap-4">
             <span className="relative h-20 w-20 shrink-0 overflow-hidden rounded-full border-4 border-white/25 bg-white shadow-2xl">

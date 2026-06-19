@@ -1,6 +1,8 @@
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import { CalendarDays, LayoutDashboard, MapPin, Shield, Sparkles, Users, WalletCards } from "lucide-react";
+import { CalendarDays, LayoutDashboard, MapPin, Shield, Sparkles, UserPlus, Users, WalletCards } from "lucide-react";
+import { cancelPeladaJoinRequestAction, requestPeladaJoinAction } from "@/app/actions";
+import { ActionStateForm } from "@/components/action-state-form";
 import { Card, CardTitle, LinkButton } from "@/components/ui";
 import { brl } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/server";
@@ -63,6 +65,15 @@ export default async function PublicPeladaPage({ params }: { params: Promise<{ s
       .maybeSingle()
     : { data: null };
   const canOpenPanel = membership?.role === "owner" || membership?.role === "admin";
+  const isMember = Boolean(membership);
+  const { data: joinRequest } = user && !isMember
+    ? await supabase
+      .from("pelada_join_requests")
+      .select("status")
+      .eq("pelada_id", pelada.id)
+      .eq("user_id", user.id)
+      .maybeSingle()
+    : { data: null };
 
   return (
     <div className="mx-auto max-w-6xl space-y-6">
@@ -83,6 +94,25 @@ export default async function PublicPeladaPage({ params }: { params: Promise<{ s
                 <LayoutDashboard size={18} />
                 Acessar painel
               </LinkButton>
+            </div>
+          ) : !user ? (
+            <div className="absolute right-5 top-5 z-10">
+              <LinkButton href="/login" className="bg-white text-brand-950 hover:bg-slate-100">
+                <UserPlus size={18} />
+                Entrar para solicitar
+              </LinkButton>
+            </div>
+          ) : !isMember ? (
+            <div className="absolute right-5 top-5 z-10">
+              {joinRequest?.status === "pending" ? (
+                <CancelJoinRequestForm peladaId={pelada.id} publicSlug={pelada.public_slug} />
+              ) : (
+                <JoinRequestForm
+                  peladaId={pelada.id}
+                  publicSlug={pelada.public_slug}
+                  submitLabel={joinRequest?.status === "rejected" ? "Solicitar novamente" : "Solicitar participação"}
+                />
+              )}
             </div>
           ) : null}
           <div className="absolute inset-x-0 bottom-0 p-6 sm:p-8">
@@ -141,6 +171,47 @@ export default async function PublicPeladaPage({ params }: { params: Promise<{ s
         </Card>
       </div>
     </div>
+  );
+}
+
+function CancelJoinRequestForm({ peladaId, publicSlug }: { peladaId: string; publicSlug: string }) {
+  return (
+    <ActionStateForm
+      action={cancelPeladaJoinRequestAction}
+      submitLabel={(
+        <>
+          <span className="default-label">Solicitação enviada</span>
+          <span className="hover-label">Cancelar solicitação</span>
+        </>
+      )}
+      className="group space-y-0"
+      buttonClassName="bg-white text-brand-950 hover:bg-red-50 hover:text-red-700 [&_.default-label]:group-hover:hidden [&_.hover-label]:hidden [&_.hover-label]:group-hover:inline"
+    >
+      <input type="hidden" name="pelada_id" value={peladaId} />
+      <input type="hidden" name="public_slug" value={publicSlug} />
+    </ActionStateForm>
+  );
+}
+
+function JoinRequestForm({
+  peladaId,
+  publicSlug,
+  submitLabel = "Solicitar participação"
+}: {
+  peladaId: string;
+  publicSlug: string;
+  submitLabel?: string;
+}) {
+  return (
+    <ActionStateForm
+      action={requestPeladaJoinAction}
+      submitLabel={submitLabel}
+      className="space-y-0"
+      buttonClassName="bg-white text-brand-950 hover:bg-slate-100"
+    >
+      <input type="hidden" name="pelada_id" value={peladaId} />
+      <input type="hidden" name="public_slug" value={publicSlug} />
+    </ActionStateForm>
   );
 }
 
