@@ -5,7 +5,8 @@ import { ActionStateForm } from "@/components/action-state-form";
 import { BulkChargeForm } from "@/components/bulk-charge-form";
 import { DateInput } from "@/components/date-input";
 import { FinanceTabs } from "@/components/finance-tabs";
-import { BackLink, Card, CardTitle, Field, PageHeader, Stat } from "@/components/ui";
+import { PeladaPanelHeader } from "@/components/pelada-panel-header";
+import { Card, CardTitle, Field, Stat } from "@/components/ui";
 import { canManage, getMyRole, requireUser } from "@/lib/auth";
 import { todayIsoDate } from "@/lib/date";
 import { createClient } from "@/lib/supabase/server";
@@ -18,14 +19,26 @@ export default async function FinancePage({ params }: { params: Promise<{ id: st
   if (!canManage(role)) redirect(`/peladas/${id}`);
 
   const supabase = await createClient();
-  const { data: members } = await supabase
-    .from("pelada_members")
-    .select("user_id, member_type, profiles(name)")
-    .eq("pelada_id", id)
-    .order("created_at");
-  const { data: entries } = await supabase.from("financial_entries").select("*").eq("pelada_id", id).order("entry_date", { ascending: false });
-  const { data: charges } = await supabase.from("player_charges").select("*").eq("pelada_id", id).order("created_at", { ascending: false });
-  const { data: payments } = await supabase.from("player_payments").select("*").eq("pelada_id", id).order("created_at", { ascending: false });
+  const [peladaResult, membersResult, entriesResult, chargesResult, paymentsResult] = await Promise.all([
+    supabase
+      .from("peladas")
+      .select("id, name, description, venue, venue_address, default_time, status, is_public, public_slug")
+      .eq("id", id)
+      .single(),
+    supabase
+      .from("pelada_members")
+      .select("user_id, member_type, profiles(name)")
+      .eq("pelada_id", id)
+      .order("created_at"),
+    supabase.from("financial_entries").select("*").eq("pelada_id", id).order("entry_date", { ascending: false }),
+    supabase.from("player_charges").select("*").eq("pelada_id", id).order("created_at", { ascending: false }),
+    supabase.from("player_payments").select("*").eq("pelada_id", id).order("created_at", { ascending: false })
+  ]);
+  const pelada = peladaResult.data;
+  const members = membersResult.data;
+  const entries = entriesResult.data;
+  const charges = chargesResult.data;
+  const payments = paymentsResult.data;
 
   const entryBalance = (entries ?? []).reduce((sum: number, e: any) => sum + (e.type === "revenue" ? Number(e.amount) : -Number(e.amount)), 0);
   const chargeOpen = (charges ?? []).filter((c: any) => c.status === "open").reduce((sum: number, c: any) => sum + Number(c.amount), 0);
@@ -59,12 +72,9 @@ export default async function FinancePage({ params }: { params: Promise<{ id: st
 
   return (
     <>
-      <div className="mb-4">
-        <BackLink href={`/peladas/${id}`}>Voltar para a pelada</BackLink>
-      </div>
-      <PageHeader title="Financeiro" description="Cobranças, pagamentos, despesas e saldo por competência." theme="dark" />
+      <PeladaPanelHeader pelada={pelada} manageable active="financeiro" />
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+      <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
         <Stat label="Saldo de lançamentos" value={brl(entryBalance)} />
         <Stat label="Pagamentos aprovados" value={brl(paymentTotal)} />
         <Stat label="Saldo geral" value={brl(totalBalance)} />
@@ -285,3 +295,4 @@ function groupByCompetence(charges: any[], payments: any[], entries: any[]) {
 
   return result;
 }
+

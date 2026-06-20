@@ -1,7 +1,8 @@
 import { ShieldPlus, UsersRound } from "lucide-react";
 import { addMemberAction, updateMemberRoleFormAction } from "@/app/actions";
 import { ActionStateForm } from "@/components/action-state-form";
-import { BackLink, Card, CardTitle, Field, PageHeader } from "@/components/ui";
+import { PeladaPanelHeader } from "@/components/pelada-panel-header";
+import { Card, CardTitle, Field } from "@/components/ui";
 import { UserAvatar } from "@/components/user-avatar";
 import { canManage, getMyRole, requireUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
@@ -11,7 +12,13 @@ export default async function MembersPage({ params }: { params: Promise<{ id: st
   const { id } = await params;
   await requireUser();
   const role = await getMyRole(id);
+  const manageable = canManage(role);
   const supabase = await createClient();
+  const { data: pelada } = await supabase
+    .from("peladas")
+    .select("id, name, description, venue, venue_address, default_time, status, is_public, public_slug")
+    .eq("id", id)
+    .single();
   const { data: members } = await supabase
     .from("pelada_members")
     .select("user_id, role, member_type, profiles(id, name, email, phone, avatar_url)")
@@ -20,11 +27,8 @@ export default async function MembersPage({ params }: { params: Promise<{ id: st
 
   return (
     <>
-      <div className="mb-4">
-        <BackLink href={`/peladas/${id}`}>Voltar para a pelada</BackLink>
-      </div>
-      <PageHeader title="Membros" description="Gerencie permissões e tipos de membro da pelada." theme="dark" />
-      <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
+      <PeladaPanelHeader pelada={pelada} manageable={manageable} active="membros" />
+      <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_360px]">
         <Card>
           <CardTitle icon={UsersRound}>Lista de membros</CardTitle>
           <div className="mt-4 space-y-3">

@@ -6,8 +6,6 @@ import {
   CalendarPlus2,
   Check,
   CircleDollarSign,
-  Clock3,
-  MapPin,
   ReceiptText,
   UserPlus,
   UsersRound,
@@ -15,11 +13,11 @@ import {
 } from "lucide-react";
 import { reviewPeladaJoinRequestFormAction } from "@/app/actions";
 import { redirect } from "next/navigation";
-import { PeladaQuickActionsMenu } from "@/components/pelada-quick-actions-menu";
-import { Card, CardTitle, EmptyState, LinkButton, PageHeader, Stat } from "@/components/ui";
+import { PeladaPanelHeader } from "@/components/pelada-panel-header";
+import { Card, CardTitle, EmptyState, LinkButton, Stat } from "@/components/ui";
 import { canManage, getMyRole, requireUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
-import { brl, competenceLabel, dateLabel, getRoundOperationalStatus, peladaStatusLabel, roundStatusLabel } from "@/lib/utils";
+import { brl, competenceLabel, dateLabel, getRoundOperationalStatus, roundStatusLabel } from "@/lib/utils";
 
 type PresenceStatus = "confirmed" | "declined" | "pending";
 
@@ -163,40 +161,10 @@ export default async function PeladaDetailsPage({ params }: { params: Promise<{ 
     ? `${nextRoundPresence.confirmed}/${nextRound.player_limit} jogadores`
     : `${nextRoundPresence.confirmed} confirmados`;
   const peladaVenueLabel = pelada?.venue_address ?? pelada?.venue ?? null;
-  const topMeta = [
-    peladaVenueLabel ? { icon: MapPin, label: peladaVenueLabel } : null,
-    pelada?.default_time ? { icon: Clock3, label: `Horário padrão ${pelada.default_time.slice(0, 5)}` } : null,
-    pelada?.status ? { icon: CircleDollarSign, label: `Status ${peladaStatusLabel(pelada.status)}` } : null
-  ].filter(Boolean) as { icon: typeof MapPin; label: string }[];
-  const publicPeladaHref = pelada?.is_public && pelada?.public_slug ? `/pelada/${pelada.public_slug}` : null;
 
   return (
     <>
-      <section className="surface-dark px-6 py-7 sm:px-8">
-        <PageHeader
-          title={pelada?.name ?? "Pelada"}
-          description={pelada?.description ?? "Painel operacional da pelada."}
-          theme="dark"
-          action={<PeladaQuickActionsMenu peladaId={id} manageable={manageable} publicHref={publicPeladaHref} />}
-        />
-
-        {topMeta.length ? (
-          <div className="mt-4 flex flex-wrap gap-2">
-            {topMeta.map((item) => (
-              <span key={item.label} className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/12 px-3 py-2 text-sm text-white">
-                <item.icon size={16} className="text-field-200" />
-                {item.label}
-              </span>
-            ))}
-          </div>
-        ) : null}
-      </section>
-
-      <nav className="mt-4 flex gap-2 overflow-x-auto rounded-3xl border border-brand-700/45 bg-brand-950/55 p-2 shadow-soft" aria-label="Menu da pelada">
-        <PeladaNavLink href={`/peladas/${id}/rodadas`} icon={CalendarDays} label="Rodadas" />
-        <PeladaNavLink href={`/peladas/${id}/membros`} icon={UsersRound} label="Membros" />
-        {manageable ? <PeladaNavLink href={`/peladas/${id}/financeiro`} icon={CircleDollarSign} label="Financeiro" /> : null}
-      </nav>
+      <PeladaPanelHeader pelada={pelada} manageable={manageable} active="painel" />
 
       <div className={`mt-6 grid gap-4 ${manageable ? "sm:grid-cols-2 xl:grid-cols-5" : "sm:grid-cols-2 xl:grid-cols-4"}`}>
         <Stat label="Membros" value={members.length} description="Total de participantes vinculados" />
@@ -442,26 +410,6 @@ function ReviewJoinRequestForm({
 
 function Chip({ children }: { children: React.ReactNode }) {
   return <span className="rounded-full bg-white px-2.5 py-1">{children}</span>;
-}
-
-function PeladaNavLink({
-  href,
-  icon: Icon,
-  label
-}: {
-  href: string;
-  icon: typeof CalendarDays;
-  label: string;
-}) {
-  return (
-    <Link
-      href={href}
-      className="inline-flex h-11 shrink-0 items-center gap-2 rounded-2xl px-4 text-sm font-semibold text-slate-100 hover:bg-white/10 hover:text-white"
-    >
-      <Icon size={17} className="text-field-200" />
-      {label}
-    </Link>
-  );
 }
 
 function Row({ label, value, highlight = false }: { label: string; value: React.ReactNode; highlight?: boolean }) {

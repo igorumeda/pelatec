@@ -1,9 +1,10 @@
 import { CalendarDays, CalendarPlus2 } from "lucide-react";
 import { upsertRoundAction } from "@/app/actions";
 import { ActionStateForm } from "@/components/action-state-form";
+import { PeladaPanelHeader } from "@/components/pelada-panel-header";
 import { RoundFormFields } from "@/components/round-form-fields";
 import { RoundsListManager, type ManagedRound } from "@/components/rounds-list-manager";
-import { BackLink, Card, CardTitle, PageHeader } from "@/components/ui";
+import { Card, CardTitle } from "@/components/ui";
 import { canManage, getMyRole, requireUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { getRoundOperationalStatus } from "@/lib/utils";
@@ -12,8 +13,13 @@ export default async function RoundsPage({ params }: { params: Promise<{ id: str
   const { id } = await params;
   await requireUser();
   const role = await getMyRole(id);
+  const manageable = canManage(role);
   const supabase = await createClient();
-  const { data: pelada } = await supabase.from("peladas").select("name, venue, venue_address, default_time").eq("id", id).single();
+  const { data: pelada } = await supabase
+    .from("peladas")
+    .select("id, name, description, venue, venue_address, default_time, status, is_public, public_slug")
+    .eq("id", id)
+    .single();
   const { data: rounds } = await supabase
     .from("rounds")
     .select("*")
@@ -50,17 +56,14 @@ export default async function RoundsPage({ params }: { params: Promise<{ id: str
 
   return (
     <>
-      <div className="mb-4">
-        <BackLink href={`/peladas/${id}`}>Voltar para a pelada</BackLink>
-      </div>
-      <PageHeader title="Agenda" description={`Rodadas da ${pelada?.name ?? "pelada"}.`} theme="dark" />
-      <div className="grid gap-6 lg:grid-cols-[1fr_380px]">
+      <PeladaPanelHeader pelada={pelada} manageable={manageable} active="rodadas" />
+      <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_380px]">
         <Card>
           <CardTitle icon={CalendarDays}>Rodadas cadastradas</CardTitle>
-          <RoundsListManager peladaId={id} rounds={managedRounds} canManage={canManage(role)} />
+          <RoundsListManager peladaId={id} rounds={managedRounds} canManage={manageable} />
         </Card>
 
-        {canManage(role) ? (
+        {manageable ? (
           <Card>
             <CardTitle icon={CalendarPlus2}>Criar rodada</CardTitle>
             <ActionStateForm action={action} submitLabel="Criar" className="mt-4 space-y-4">
