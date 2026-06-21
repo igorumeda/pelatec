@@ -51,7 +51,7 @@ export default async function PublicPeladaPage({ params }: { params: Promise<{ s
 
   const bannerSrc = pelada.banner_url || defaultBanner;
   const crestSrc = pelada.crest_url || defaultCrest;
-  const location = [pelada.venue_address ?? pelada.venue, pelada.neighborhood, pelada.city].filter(Boolean).join(" - ");
+  const location = [pelada.venue ?? pelada.venue_address, pelada.neighborhood, pelada.city].filter(Boolean).join(" - ");
   const averageQuality = Number(pelada.average_player_quality ?? 0);
   const {
     data: { user }

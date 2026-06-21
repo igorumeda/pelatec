@@ -50,7 +50,7 @@ export default async function PeladasPage() {
                       </span>
                       <span>{row.peladas.name}</span>
                     </h2>
-                    <p className="mt-2 text-sm text-slate-600">{row.peladas.venue_address ?? row.peladas.venue ?? "Local não informado"}</p>
+                    <p className="mt-2 text-sm text-slate-600">{row.peladas.venue ?? row.peladas.venue_address ?? "Local não informado"}</p>
                   </div>
                   <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold uppercase text-slate-600">{memberRoleLabel(row.role)}</span>
                 </div>

@@ -160,7 +160,7 @@ export default async function PeladaDetailsPage({ params }: { params: Promise<{ 
   const nextRoundLimitLabel = nextRound?.player_limit
     ? `${nextRoundPresence.confirmed}/${nextRound.player_limit} jogadores`
     : `${nextRoundPresence.confirmed} confirmados`;
-  const peladaVenueLabel = pelada?.venue_address ?? pelada?.venue ?? null;
+  const peladaVenueLabel = pelada?.venue ?? pelada?.venue_address ?? null;
 
   return (
     <>

@@ -527,7 +527,7 @@ function SearchField({ value, onChange, placeholder }: { value: string; onChange
 function PeladaExploreCard({ pelada }: { pelada: ExplorePelada & { distanceKm: number | null } }) {
   const bannerSrc = pelada.banner_url || defaultBanner;
   const crestSrc = pelada.crest_url || defaultCrest;
-  const location = [pelada.venue_address ?? pelada.venue, pelada.neighborhood, pelada.city].filter(Boolean).join(" - ");
+  const location = [pelada.venue ?? pelada.venue_address, pelada.neighborhood, pelada.city].filter(Boolean).join(" - ");
   const href = `/pelada/${pelada.public_slug}`;
 
   return (

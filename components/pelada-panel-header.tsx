@@ -23,7 +23,7 @@ type PeladaPanelHeaderProps = {
 export function PeladaPanelHeader({ pelada, manageable, active }: PeladaPanelHeaderProps) {
   const peladaId = pelada?.id ?? "";
   const publicHref = pelada?.is_public && pelada.public_slug ? `/pelada/${pelada.public_slug}` : null;
-  const venueLabel = pelada?.venue_address ?? pelada?.venue ?? null;
+  const venueLabel = pelada?.venue ?? pelada?.venue_address ?? null;
   const topMeta = [
     venueLabel ? { icon: MapPin, label: venueLabel } : null,
     pelada?.default_time ? { icon: Clock3, label: `Horário padrão ${pelada.default_time.slice(0, 5)}` } : null,
@@ -82,11 +82,13 @@ function PeladaNavLink({
       href={href}
       aria-current={active ? "page" : undefined}
       className={cn(
-        "inline-flex h-11 shrink-0 items-center gap-2 rounded-2xl px-4 text-sm font-semibold transition",
-        active ? "bg-white/14 text-white shadow-sm" : "text-slate-100 hover:bg-white/10 hover:text-white"
+        "inline-flex h-11 shrink-0 items-center gap-2 rounded-2xl border px-4 text-sm font-semibold transition",
+        active
+          ? "border-field-300/40 bg-field-500 text-white shadow-sm shadow-field-950/20"
+          : "border-transparent text-slate-100 hover:bg-white/10 hover:text-white"
       )}
     >
-      <Icon size={17} className={active ? "text-field-200" : "text-slate-300"} />
+      <Icon size={17} className={active ? "text-white" : "text-slate-300"} />
       {label}
     </Link>
   );

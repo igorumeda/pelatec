@@ -70,7 +70,7 @@ export default async function RoundsPage({ params }: { params: Promise<{ id: str
               <input type="hidden" name="pelada_id" value={id} />
               <RoundFormFields
                 defaultTime={pelada?.default_time}
-                defaultVenue={pelada?.venue_address ?? pelada?.venue ?? ""}
+                defaultVenue={pelada?.venue ?? pelada?.venue_address ?? ""}
               />
               <input type="hidden" name="status" value="active" />
             </ActionStateForm>
